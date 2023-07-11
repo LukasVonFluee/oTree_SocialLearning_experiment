@@ -34,7 +34,7 @@ SESSION_CONFIGS = [
 # e.g. self.session.config['participation_fee']
 
 SESSION_CONFIG_DEFAULTS = dict(
-    real_world_currency_per_point=0.002, participation_fee=4.5, doc=""
+    real_world_currency_per_point=0.3, participation_fee=650, doc=""
 )
 
 PARTICIPANT_FIELDS = ['wrong_answer_1', 'wrong_answer_2', 'wrong_answer_3', 'wrong_answer_4', 'wrong_answer_5', 'wrong_answer_6',
@@ -54,7 +54,7 @@ SESSION_FIELDS = ['length_multi_digit', 'timeout_seconds_multi_digit', 'num_roun
 LANGUAGE_CODE = 'en'
 
 # e.g. EUR, GBP, CNY, JPY
-REAL_WORLD_CURRENCY_CODE = 'USD'
+REAL_WORLD_CURRENCY_CODE = 'KES'
 USE_POINTS = True
 
 ROOMS = [
