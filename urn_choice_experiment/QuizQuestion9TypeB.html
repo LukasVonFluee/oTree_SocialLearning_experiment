@@ -1,0 +1,44 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style>
+
+        .form_label {
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 9</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <div class="form_label"> For <span class="bold">how many rounds during one given block</span> can type A participants choose between the
+        two urns and try to find out which urn might have more marbles of their winning colours? Please enter a number below without adding any words to it:</div>
+
+    </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.question9_type_b %}
+
+    </div>
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+
+

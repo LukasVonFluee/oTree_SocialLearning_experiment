@@ -1,0 +1,47 @@
+class WaitForTypeA(WaitPage):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B
+
+    wait_for_all_groups = True
+
+    form_model = 'player'
+    title_text = "Please wait"
+    body_text = (
+        "Please wait, until all type A participants have chosen between the two urns for 4 rounds."
+    )
+
+    @staticmethod
+    def after_all_players_arrive(group: Group):
+        print('all players of this group:', group.get_players())
+        number_left_urn_triangle = 0
+        number_left_urn_square = 0
+        for p in group.get_players():
+            print('type of focal player:', p.type_assignment)
+            print('group of focal player:', p.group_assignment)
+            if p.participant.type_assignment == C.TYPE_A:
+                if p.participant.group_assignment == C.GROUP_TRIANGLE:
+                    if p.participant.urn_choice == 0:
+                        number_left_urn_triangle = number_left_urn_triangle + 1
+                    else:
+                        number_left_urn_triangle = number_left_urn_triangle + 0
+                elif p.participant.group_assignment == C.GROUP_SQUARE:
+                    if p.participant.urn_choice == 0:
+                        number_left_urn_square = number_left_urn_square + 1
+                    else:
+                        number_left_urn_square = number_left_urn_square + 0
+
+        for p in group.get_players():
+            print('type of focal player:', p.type_assignment)
+            print('group of focal player:', p.group_assignment)
+            if p.participant.type_assignment == C.TYPE_B:
+                p.number_left_urn_triangle = number_left_urn_triangle
+                p.participant.number_left_urn_triangle = p.number_left_urn_triangle
+                p.number_left_urn_square = number_left_urn_square
+                p.participant.number_left_urn_square = p.number_left_urn_square
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.number_left_urn_triangle = player.number_left_urn_triangle
+        participant.number_left_urn_square = player.number_left_urn_square

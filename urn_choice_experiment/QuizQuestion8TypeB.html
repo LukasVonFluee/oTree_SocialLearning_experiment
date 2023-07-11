@@ -1,0 +1,42 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style>
+
+        .form_label {
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 8</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <div class="form_label"> <span class="bold">When</span> are the two urns <span class="bold">shuffled</span>?</div>
+
+    </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.question8_type_b %}
+
+    </div>
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+

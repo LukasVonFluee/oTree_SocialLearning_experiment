@@ -1,0 +1,135 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        .column {
+            float: left;
+            width: 50%;
+            padding: 20px;
+        }
+
+        .center_img {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid blue;
+        }
+
+    </style>
+
+<h2>Block {{ block_number }}</h2>
+
+    {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+
+            {% if participant.similar_ingroup == 0.1 %}
+
+                <p class="center_img"> <img src="{% static triangle_01 %}" alt="triangle 01." width="90%"/> </p>
+
+                {% elif participant.similar_ingroup == 0.9 %}
+
+                <p class="center_img"> <img src="{% static triangle_09 %}" alt="triangle 09." width="90%"/> </p>
+
+                {% endif %}
+
+        {% if participant.observing_ingroup == 0 %}
+
+            {# IF 0 square individual learners have chosen the LEFT URN #}
+            {{ if number_left_urn_square == 0 }}
+            <p class="center_img"> <img width="60%" src="{% static square_right5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {# IF 1 square individual learners have chosen the LEFT URN #}
+            {{ elif number_left_urn_square == 1 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left1_right4 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 2 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left2_right3 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 3 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left3_right2 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 4 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left4_right1 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 5 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ endif }}
+
+        {% elif participant.observing_ingroup == 1 %}
+
+            {# IF 0 triangle individual learners have chosen the LEFT URN #}
+            {{ if number_left_urn_triangle == 0 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_right5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {# IF 1 triangle individual learners have chosen the LEFT URN #}
+            {{ elif number_left_urn_triangle == 1 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left1_right4 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 2 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left2_right3 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 3 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left3_right2 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 4 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left4_right1 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 5 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ endif }}
+
+        {% endif %}
+
+    {% elif participant.group_assignment == C.GROUP_SQUARE %}
+
+            {% if participant.similar_ingroup == 0.1 %}
+
+                <p class="center_img"> <img src="{% static square_01 %}" alt="square 01." width="90%"/> </p>
+
+                {% elif participant.similar_ingroup == 0.9 %}
+
+                <p class="center_img"> <img src="{% static square_09 %}" alt="square 09." width="90%"/> </p>
+
+                {% endif %}
+
+        {% if participant.observing_ingroup == 0 %}
+
+            {# IF 0 triangle individual learners have chosen the LEFT URN #}
+            {{ if number_left_urn_triangle == 0 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_right5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {# IF 1 triangle individual learners have chosen the LEFT URN #}
+            {{ elif number_left_urn_triangle == 1 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left1_right4 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 2 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left2_right3 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 3 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left3_right2 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 4 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left4_right1 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_triangle == 5 }}
+            <p class="center_img"> <img width="60%" src="{% static triangle_left5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ endif }}
+
+        {% elif participant.observing_ingroup == 1 %}
+
+            {# IF 0 square individual learners have chosen the LEFT URN #}
+            {{ if number_left_urn_square == 0 }}
+            <p class="center_img"> <img width="60%" src="{% static square_right5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {# IF 1 square individual learners have chosen the LEFT URN #}
+            {{ elif number_left_urn_square == 1 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left1_right4 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 2 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left2_right3 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 3 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left3_right2 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 4 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left4_right1 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ elif number_left_urn_square == 5 }}
+            <p class="center_img"> <img width="60%" src="{% static square_left5 %}" alt="Image showing choice distribution of triangle individual learners."/> </p>
+            {{ endif }}
+
+        {% endif %}
+
+    {% endif %}
+
+{{ next_button }}
+
+{{ endblock }}
+
+

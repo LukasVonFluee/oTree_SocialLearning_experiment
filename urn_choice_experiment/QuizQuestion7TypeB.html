@@ -1,0 +1,43 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style>
+
+        .form_label {
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 7</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <div class="form_label"> If in a given block, the <b>left urn</b> has more marbles of the winning color for the type A participants of
+      the <b>triangle group</b>, then which urn is optimal for type A participants of the <b>square group</b>? </div>
+
+    </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.question7_type_b %}
+
+    </div>
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+

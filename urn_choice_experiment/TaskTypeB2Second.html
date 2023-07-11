@@ -1,0 +1,55 @@
+{{ block content }}
+
+<style>
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+    height: 130px;
+ }
+
+.center_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
+
+</style>
+
+<h1>Block {{ block_number }}</h1>
+
+{# IF URN CHOSEN = LEFT #}
+
+{{ if player.participant.urn_choice == 0 }}
+
+        <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+                <div class="card-body">
+
+                    <p class="center_img"> <img width="70%" src="{% static left_urn_chosen_soc %}" alt="Image showing left urn chosen."/> </p>
+
+                </div>
+
+        </div>
+
+{# IF URN CHOSEN = RIGHT #}
+
+{{ elif player.participant.urn_choice == 1 }}
+
+        <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+                <div class="card-body">
+
+                    <p class="center_img"> <img width="70%" src="{% static right_urn_chosen_soc %}" alt="Image showing right urn chosen."/> </p>
+
+                </div>
+
+        </div>
+
+{{ endif }}
+
+{{ next_button }}
+
+{{ endblock }}

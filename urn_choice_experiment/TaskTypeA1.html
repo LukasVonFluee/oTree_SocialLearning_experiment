@@ -1,0 +1,51 @@
+{{ block content }}
+
+<style>
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+    height: 120px;
+ }
+
+.center_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+ }
+
+</style>
+
+<h1>Block {{ block_number}}: Round {{ round_in_block }}</h1>
+
+<div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <p style="font-size:24px"> Please choose an urn: </p>
+
+        <div class="center">
+
+                <p> {{ form.urn_choice }} </p>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="card bg-light instructions">
+
+    <div class="card-body">
+        <p class="center_img"> <img src="{% static image_path %}" width="55%" alt="Picture showing the two urns to choose from"/> </p>
+    </div>
+
+</div>
+
+{{ next_button }}
+
+{{ endblock }}
+
+
