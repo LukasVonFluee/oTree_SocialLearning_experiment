@@ -1,1 +1,2 @@
-# urn_choice_experiment
+# ConformistLearning
+o-Tree workload for University of Lausanne
