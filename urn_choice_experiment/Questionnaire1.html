@@ -1,0 +1,38 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.important_info {
+            text-align: center;
+        }
+
+    </style>
+
+    <h1>This was the last block. </h1>
+
+    <p> Before we tell you how much you earned, we kindly ask you to fill out a questionnaire. All data will be kept strictly anonymous and confidential.</p>
+
+    <h1>Questionnaire Question 1</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.q1 %}
+
+    </div>
+
+    </div>
+
+    <br>
+
+    {{ next_button }}
+
+{{ endblock }}

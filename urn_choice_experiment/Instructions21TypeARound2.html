@@ -1,0 +1,196 @@
+{{ block content }}
+
+<style>
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+    height: 130px;
+ }
+
+.center_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
+
+</style>
+
+<h1>Practice Block: Round 2</h1>
+
+    {{ comment }} If winning_color_triangle == 'red': {{ endcomment }}
+
+    {{ if subsession.session.winning_color_triangle == 'red' }}
+
+        {# IF PARTICIPANT GROUP = TRIANGLE  #}
+
+        {{ if participant.group_assignment == C.GROUP_TRIANGLE }}
+
+            {# IF URN CHOSEN = LEFT #}
+
+            {{ if player.participant.urn_choice == 0 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_left == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_left_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_left == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_left_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {# IF URN CHOSEN = RIGHT #}
+
+            {{ elif player.participant.urn_choice == 1 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_right == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_right_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_right == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_right_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {{ endif }}
+
+        {# IF PARTICIPANT GROUP = SQUARE #}
+
+        {{ elif participant.group_assignment == C.GROUP_SQUARE }}
+
+            {# IF URN CHOSEN = LEFT #}
+
+            {{ if player.urn_choice == 0 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_left == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_left_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_left == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_left_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {% endif %}
+                </div>
+
+            {# IF URN CHOSEN = RIGHT #}
+
+            {{ elif player.urn_choice == 1 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_right == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_right_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_right == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_right_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {% endif %}
+                </div>
+
+            {{ endif }}
+
+        {{ endif }}
+
+    {{ comment }} If winning_color_triangle == 'blue': {{ endcomment }}
+
+    {{ elif subsession.session.winning_color_triangle == 'blue' }}
+
+        {# IF PARTICIPANT GROUP = TRIANGLE #}
+
+        {{ if participant.group_assignment == C.GROUP_TRIANGLE }}
+
+            {# IF URN CHOSEN = LEFT #}
+
+            {{ if player.urn_choice == 0 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_left == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_left_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_left == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_left_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {# IF URN CHOSEN = RIGHT #}
+
+            {{ elif player.urn_choice == 1 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_right == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_right_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_right == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_blue_right_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {{ endif }}
+
+        {# IF PARTICIPANT GROUP = SQUARE #}
+
+        {{ elif participant.group_assignment == C.GROUP_SQUARE }}
+
+            {# IF URN CHOSEN = LEFT #}
+
+            {{ if player.urn_choice == 0 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_left == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_left_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_left == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_left_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {# IF URN CHOSEN = RIGHT #}
+
+            {{ elif player.urn_choice == 1 }}
+
+                <div class="card-body">
+                        {# IF DRAWN marble 'red' #}
+                        {{ if participant.color_drawn_marble_right == 'red' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_right_urn_red_marble %}" alt="Image showing a red marble drawn."/> </p>
+                        {# IF DRAWN marble 'blue' #}
+                        {{ elif participant.color_drawn_marble_right == 'blue' }}
+                        <p class="center_img"> <img width="70%" src="{% static wc_red_right_urn_blue_marble %}" alt="Image showing a blue marble drawn."/> </p>
+                        {{ endif }}
+                </div>
+
+            {{ endif }}
+
+        {{ endif }}
+
+    {{ endif }}
+
+        <h5>Recall: You belong to the
+        {{ if participant.group_assignment == C.GROUP_TRIANGLE }} <b>triangle</b> group, and thus you earn
+            {{if subsession.session.winning_color_triangle == 'red' }}
+                <span style="color:red"> 100 points  </span> for
+                <span style="color:red"> red </span> and <span style="color:blue"> 0 points </span> for
+                <span style="color:blue"> blue </span>.
+            {{ else }}
+                <span style="color:red"> 0 points </span> for <span style="color:red"> red </span> and
+                <span style="color:blue"> 100 points </span> for <span style="color:blue"> blue </span>.
+            {{ endif }}
+        {{ elif participant.group_assignment == C.GROUP_SQUARE }} <b>square</b> group and thus, you earn
+            {{if subsession.session.winning_color_triangle == 'red' }}
+                <span style="color:red"> 0 points </span> for <span style="color:red"> red </span> and
+                <span style="color:blue"> 100 points </span> for <span style="color:blue"> blue </span>.
+            {{ else }}
+                <span style="color:red"> 100 points </span> for <span style="color:red"> red </span> and
+                <span style="color:blue"> 0 points </span> for <span style="color:blue"> blue</span>.
+            {{ endif }}
+        {{ endif }}
+    </h5>
+
+{{ next_button }}
+
+{{ endblock }}

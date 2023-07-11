@@ -1,0 +1,38 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        img {
+            border: 1px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Set Up for Decision Task</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> The examples shown before were just to illustrate that everyone chooses from the same two urns.</b> </li>
+                <li> But recall that the <b>colours of the marbles in the urns are hidden</b>.</li>
+                <li> Thus, after shuffling the two urns, no participant knows for sure in which urn which set of
+                    marbles is.</li>
+            </ul>
+        </div>
+    </div>
+
+    <img src="{% static image_path %}" width="100%" alt="Image showing same urns for everyone with marble colours hidden."/>
+
+
+    {{ next_button }}
+
+{{ endblock }}

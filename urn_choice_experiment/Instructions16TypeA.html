@@ -1,0 +1,49 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Sequence during 1 Block:</h1>
+
+    <h3>Type A participants choose between urns</h3>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                <li> After the urns have been shuffled, one of them is better for you because it has <b>more</b>
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+                        <span style="color:{{subsession.session.winning_color_triangle}}">
+                            {{subsession.session.winning_color_triangle}} </span>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %}
+                        <span style="color:{{subsession.session.winning_color_square}}">
+                            {{subsession.session.winning_color_square}} </span>
+                    {% endif %} marbles. </li>
+                <li> Because the urns are shuffled at the beginning of a block and the colours of the marbles are hidden,
+                    you <b>don't know for sure which urn is better</b>.</li>
+                <li> But because you can always <b>see the colour</b> of the marble that is drawn from the
+                    urn you choose, and because the urns are not shuffled during the 4 rounds in a block, you can
+                    <b>try to find out</b> in those 4 rounds <b>which urn has more marbles of your winning colour</b>. </li>
+
+            </ul>
+        </div>
+
+    </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

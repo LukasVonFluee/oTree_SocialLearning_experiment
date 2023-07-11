@@ -1,0 +1,44 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style>
+
+        .form_label {
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 5</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <div class="form_label"> What is the probability that a red marble will get drawn from the left urn, if there are 3 blue marbles in the
+      right urn? Please enter the probability as a number between 0-100 without the percentage sign: </div>
+
+    </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.question5_type_a %}
+
+    </div>
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+
+

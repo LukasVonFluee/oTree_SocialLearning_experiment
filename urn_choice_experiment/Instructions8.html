@@ -1,0 +1,57 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        video {
+            border: 1px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Setup for Decision Task</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+            <div class="ul_properties">
+
+                <ul style="font-size:20px">
+                    <li> In the video clip below we show you a process that will be repeated multiple times in this study.</li>
+                    <li> After reading the first image of the video clip, please click on it to start the video. </li>
+                    <li> Only if you watch the entire video clip, a "Next" button will appear <b> below the video. </b> </li>
+                    <li> Please also carefully read what is written in the last image shown in the video clip.  </li>
+                </ul>
+            </div>
+    </div>
+
+    <video width=100% controls id="video">
+                    <source src="{% static image_path %}" type="video/mp4">
+    Sorry, your browser doesn't support embedded videos.
+
+    </video>
+
+    {% comment %}
+    add an EventListener that checks for whether the video has finished. If so, edit button style. Below you can see
+    that the button is hidden; style="visibility: hidden". As soon as video is finished, the EventListener will edit
+    this bye 'button.style.visibility = "visible"' and make button visible; style="visibility: visible"
+    {% endcomment %}
+
+    <script>
+        const video = document.querySelector('video');
+        video.addEventListener('ended', (event) => {
+            const button = document.getElementById("Next");
+            button.style.visibility = "visible";
+        });
+    </script>
+
+    <button class="otree-btn-next btn btn-primary" id="Next" style="visibility: hidden;">Next</button>
+
+{{ endblock }}
+
+

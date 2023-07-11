@@ -1,0 +1,43 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.four {
+            border: 3px solid #3368FF;
+        }
+
+    </style>
+
+    <h2>Type A participants choose between urns</h2>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> Type A participants get points for either <b><span style="color:{{ session.winning_color_triangle }}"> {{ session.winning_color_triangle }}</span></b> marbles
+                    or <b><span style="color:{{ session.winning_color_square }}"> {{ session.winning_color_square }}</span></b> marbles.</li>
+
+                <li>For you, the most important thing to remember is that <b>Type A participants of the two groups,
+                    triangle &#9650; and square &#9632;, earn points for opposite colours</b>.</li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

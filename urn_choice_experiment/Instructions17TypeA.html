@@ -1,0 +1,37 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Sequence during 1 Block:</h1>
+
+    <h3>Type B participants complete their decision tasks.</h3>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> As soon as each type A participant has chosen 4 times between the two urns in a give block, type B
+                    participants will face their decision task in this same block.</li>
+                <li> After a given block has ended, a new block starts and this will be repeated <b>20 times</b>.</li>
+                <li> In every block, you have a new chance to earn a maximal amount of <b>400 points</b>. </li>
+            </ul>
+
+        </div>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

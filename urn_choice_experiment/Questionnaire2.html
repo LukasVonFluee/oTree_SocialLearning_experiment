@@ -1,0 +1,34 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.important_info {
+            text-align: center;
+        }
+
+    </style>
+
+    <h1>Questionnaire Question 2</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.q2 %}
+        
+    </div>
+    
+    </div>
+
+    <br>
+
+    {{ next_button }}
+
+{{ endblock }}

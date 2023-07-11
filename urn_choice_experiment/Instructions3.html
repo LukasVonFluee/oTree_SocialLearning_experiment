@@ -1,0 +1,40 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        video {
+            border: 1px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Two Types</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+            <div class="ul_properties">
+
+                <ul style="font-size:20px">
+                    <li> Within both groups, there are two <b>types</b> of participants; Type <b>A</b> and type <b>B</b>. </li>
+                    <li> These two types will conduct slightly different tasks during the experiment. </li>
+                </ul>
+            </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <p class="center_img"> <img src="{% static image_path %}" alt="Type A and group triangle assignment." width="100%"/> </p>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}
+

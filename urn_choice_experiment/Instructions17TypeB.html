@@ -1,0 +1,39 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h2>Type A participants choose between urns</h2>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> So, one of both urns is better for <b>triangle</b> type <b>A</b> participants because it has
+                    3 out of 4 <span style="color:{{subsession.session.winning_color_triangle}}"> {{subsession.session.winning_color_triangle}} </span> marbles. </li>
+                <li> And the other urn is better for <b>square</b> type <b>A</b> participants because it has 3 out of 4
+                    <span style="color:{{subsession.session.winning_color_square}}"> {{subsession.session.winning_color_square}} </span> marbles. </li>
+                <li> Type <b>A</b> participants always <b>see the colour</b> of the marble that is drawn from the
+                    urn they choose and thus, each type <b>A</b> participant can <b>try to find out</b> which urn has more marbles of
+                    their winning colour <b>during the 4 rounds</b> of a given block in which the urns are not shuffled.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

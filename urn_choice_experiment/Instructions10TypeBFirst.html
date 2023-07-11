@@ -1,0 +1,58 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        img {
+            border: 1px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Setup for Decision Task</h1>
+
+    {{ if player.order_same_urns == 0}}
+
+        <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> During the whole study, everyone is observing and choosing from the <b>same one pair of urns</b>. </li>
+                <li> For example, if there are <b>3 red marbles and 1 blue marble</b> in the <b>left</b> urn after shuffling,
+                    then there must be <b>1 red marble and 3 blue marbles</b> in the <b>right</b> urn and this would be true for everyone.</li>
+            </ul>
+        </div>
+    </div>
+
+        <img src="{% static same_urns_left_red_majority %}" width="100%" alt="Image showing same urns for everyone."/>
+
+    {{ elif player.order_same_urns == 1}}
+
+        <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> During the whole study, everyone is observing and choosing from the <b>same one pair of urns</b>. </li>
+                <li> This means for example, if there are <b>1 red marble and 3 blue marbles</b> in the <b>left</b> urn after shuffling,
+                    then there must be <b>3 red marbles and 1 blue marble</b> in the <b>right</b> urn and this would be true for everyone.</li>
+                <li> Note, the compositions shown below constitute an example, and in any given round during the experiment
+                    this could be different. </li>
+            </ul>
+        </div>
+    </div>
+
+    <img src="{% static same_urns_right_red_majority %}" width="100%" alt="Image showing same urns for everyone."/>
+
+    {{ endif }}
+
+    {{ next_button }}
+
+{{ endblock }}

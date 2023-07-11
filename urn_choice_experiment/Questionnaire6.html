@@ -1,0 +1,48 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.important_info {
+            text-align: center;
+        }
+
+    </style>
+
+    <h1>Questionnaire Question 6</h1>
+
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        How did you allocate your cognitive resources between the memorization task and the urn choice task
+        <br>
+        (0 = all focus on memorizing, 100 = all focus on urn choice task)
+
+    </div>
+
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <input type="range" name="q6" min="0" max="100" value="50" step="1" class="form-range" oninput="this.nextElementSibling.value = this.value">
+    <output>50</output>
+
+    </div>
+    
+    </div>
+
+    <br>
+
+    {{ next_button }}
+
+{{ endblock }}

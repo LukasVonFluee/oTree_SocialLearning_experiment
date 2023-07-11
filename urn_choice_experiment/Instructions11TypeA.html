@@ -1,0 +1,61 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid blue;
+            height: 130px;
+        }
+
+        .center_img {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+
+    <h1>Instructions - Your Winning Color</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:24px">
+                <li> Below we show you the points you get for either color. </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    {% comment %} On this template, I show the winning colors to both triangle and square Type A participants. Rather
+     thant creating two different templates for the two groups of Type A participants, I use the "if" statement to only
+      show the image corresponding to either triangle or square Type A participants. I use a dictionary with two different
+      image paths in the Page class as can be seen in pages.py for the specification of the page ""
+    {% endcomment %}
+
+    <div class="card-body">
+        {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+        <p class="center_img"> <img width="60%" src="{% static image_path %}" alt="Image showing winning color for Triangle Type A participants."/> </p>
+        {% elif participant.group_assignment == C.GROUP_SQUARE %}
+        <p class="center_img"> <img width="60%" src="{% static image_path2 %}" alt="Image showing winning color for Square Type A participants."/> </p>
+        {% endif %}
+
+    </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

@@ -1,0 +1,43 @@
+{{ block content }}
+
+<style xmlns="http://www.w3.org/1999/html">
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+
+<h1>How you earn points</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                {% if participant.cognitive_load == 1 %}
+
+                <li> During the whole experiment, you will receive points for either the urn choice task or for correctly memorizing the multi digit number.
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> During the whole experiment, you will receive points for either the urn choice task or for correctly entering the multi digit number.
+
+                {% endif %}
+
+                <li> Which of the two tasks you receive points for is determined randomly by the computer at the beginning of the experiment with <b>equal probability</b>. </li>
+                <li> <b>But we do not tell you for which task you get points.</b> </li>
+                <li> Thus, if you want to maximize the points you earn, <b>you have to focus on both tasks equally</b>. </li>
+                <li> <b>IMPORTANT: IF YOU FOCUS ON ONLY ONE OF THE TWO TASKS, YOU MAY GET 0 POINTS IN THE WORST CASE.</b> </li>
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

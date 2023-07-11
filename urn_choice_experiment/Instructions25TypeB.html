@@ -1,0 +1,29 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.important_info {
+            text-align: center;
+        }
+
+    </style>
+
+    <h1>Practice Block</h1>
+
+    <div style="border:1px solid #3368FF" class="card bg-light instructions">
+    <div class="card-body" oncopy="return false" onpaste="return false" oncut="return false">
+    <p class="important_info"> <span style='border:3px solid #3368FF; font-size:70px;'>{{ show_multi_digit_number }}</span> </p>
+        <br>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

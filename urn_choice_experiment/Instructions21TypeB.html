@@ -1,0 +1,41 @@
+{{ block content }}
+
+<style xmlns="http://www.w3.org/1999/html">
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+
+<h1>Your Decision Task: 4. Step</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                {% if participant.cognitive_load == 1 %}
+
+                <li> Finally, you have to enter the {{ player.session.length_multi_digit }}-digit number that you had to memorize. </li>
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> Finally, you will have to correctly enter the {{ player.session.length_multi_digit }}-digit number that is
+                    shown to you again. This will be the exact same number that was shown to you before. So, your task is not to memorize it
+                    the first time it is shown to you but simply to enter the number that is shown to you again correctly. There
+                    is no deception in this experiment. </li>
+
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

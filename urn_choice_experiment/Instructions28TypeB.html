@@ -1,0 +1,47 @@
+{{ block content }}
+
+<style>
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+    height: 130px;
+ }
+
+.center_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
+
+</style>
+
+<h1>Practice Block</h1>
+
+{% if participant.urn_choice == 0 %}
+
+<div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+        <p class="center_img"> <img src="{% static image_path %}" width="70%" alt="Picture showing left urn chosen"/> </p>
+    </div>
+
+</div>
+
+{% elif participant.urn_choice == 1 %}
+
+<div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+        <p class="center_img"> <img src="{% static image_path2 %}" width="70%" alt="Picture showing right urn chosen"/> </p>
+    </div>
+
+</div>
+
+{% endif %}
+
+{{ next_button }}
+
+{{ endblock }}

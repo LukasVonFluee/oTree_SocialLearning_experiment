@@ -1,0 +1,41 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.four {
+            border: 3px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Practice Round</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> We will now go through one practice block.</li>
+                <li> You will not be able to choose between the two urns by clicking on the urn pictures. </li>
+                <li> Rather, you will have to choose between the urns by clicking on a button next to which it is either written "Left Urn"
+                or "Right Urn". </li>
+                <li> <b> Please be careful because the order of those buttons can change</b>. In other words, sometimes the option
+                "Left Urn" might appear as the button on top and the option "Right Urn" on the bottom. But sometimes it might
+                be the other way around. </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

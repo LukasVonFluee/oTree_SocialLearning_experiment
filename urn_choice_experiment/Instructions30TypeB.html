@@ -1,0 +1,46 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.four {
+            border: 3px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>End of Instructions</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                {% if participant.type_assignment == C.TYPE_A %}
+                <li> In every block you have a new opportunity to learn in which of the two urns there are more marbles of
+                your winning color. </li>
+                {% elif participant.type_assignment == C.TYPE_B %}
+                <li> This practice block was just an example. </li>
+                <li> Remember that the similarity to your own group in terms of winning color and whether you are observing your own group
+                    or the other group may change between blocks. </li>
+                {% endif %}
+                <li> Before we start with the experiment, we will test if you understand everything with a <b>quiz.</b> </li>
+                <li> We will only start the experiment if each participant can answer every quiz question correctly.</li>
+
+            </ul>
+        </div>
+    </div>
+    </div>
+
+{{ next_button }}
+
+{{ endblock }}

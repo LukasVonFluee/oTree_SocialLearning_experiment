@@ -1,0 +1,36 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Instructions - Decision Task</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> After the urns have been shuffled, each participant has to <b>choose between the two urns</b>.</li>
+                <li> When a participant chooses once between the urns, 1 marble of the chosen urn will be <b>randomly</b> drawn,
+                    and each time a marble is drawn, it is returned to the urn before the next marble is drawn. </li>
+                <li> The <b>colour of the marble</b> that has been drawn from your chosen urn is <b>revealed</b> before the marble is put back into the urn.</li>
+                <li> <b>Depending on the colour</b> of the drawn marble, participants can <b>earn points</b>. </li>
+                <li> After the colour of the drawn marble has been revealed, the <b>colour is hidden again</b>, and the marble is put back into the urn. </li>
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}
+
+
+

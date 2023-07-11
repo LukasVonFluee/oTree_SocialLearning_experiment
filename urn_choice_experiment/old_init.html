@@ -1,0 +1,2451 @@
+from otree.api import *
+import itertools
+import random
+""" Notice, 'import...' is greyed out as long as the package you want to import is not yet in use in your code. 
+As soon as you use functions, methods, etc, from the package, it will change."""
+author = 'Lukas von Fluee'
+doc = """
+Social learning task, with 4 groups; 5 triangle individual learners, 5 square individual learners,
+undefined number of triangle social learners, undefined number of square social learners.
+"""
+
+
+"""Below function is for likert scale questionnaire (needs to be defined before Player class where I define questionnaire fields):
+(see https://otree.readthedocs.io/en/latest/misc/tips_and_tricks.html?highlight=make_field#how-to-make-many-fields)"""
+
+
+def make_field(label):
+    return models.IntegerField(
+        choices=[1,2,3,4,5,6,7],
+        label=label,
+        widget=widgets.RadioSelect,
+    )
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+#                                                 CLASSES                                                  #
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+
+############################################################################################################
+#                                                 CONSTANTS                                                #
+############################################################################################################
+class C(BaseConstants):
+    NAME_IN_URL = 'urn_choice_instructions'
+    PLAYERS_PER_GROUP = None
+    NUM_ROUNDS = 80
+    NUM_ROUNDS_BLOCK = 4
+    ########################################################################################################
+    #                                        TYPE AND GROUP CONSTANTS                                      #
+    ########################################################################################################
+    """Types: There are two types; A (individual learners), and B (social learners).
+        Create constants consisting of strings to use in 'creating subsession:'"""
+    TYPE_A = 'individual_learner'
+    TYPE_B = 'social_learner'
+    """Names of these types to show on html pages (we don't use the terms 'individual' and 'social learners' to show to
+    participants to avoid any unwanted associations and demand effects:"""
+    TYPE_A_NAME = 'A'
+    TYPE_B_NAME = 'B'
+    """Groups: There are two groups; 'triangle', and 'square':'"""
+    GROUP_TRIANGLE = 'triangle'
+    GROUP_SQUARE = 'square'
+    ########################################################################################################
+    #                                          QUIZ ANSWERS                                                #
+    ########################################################################################################
+    """Quiz Answers:"""
+    QUIZ_TYPE_B_ANSWER_1 = 3
+    QUIZ_ANSWER_2_TYPE_B_SIMILARITY_01 = 3
+    QUIZ_ANSWER_2_TYPE_B_SIMILARITY_09 = 4
+    QUIZ_TYPE_B_ANSWER_3 = 2
+    QUIZ_TYPE_B_ANSWER_4 = 2
+    QUIZ_TYPE_B_ANSWER_5 = 1
+    QUIZ_TYPE_B_ANSWER_6 = 2
+    QUIZ_TYPE_B_ANSWER_7 = 3
+    QUIZ_TYPE_B_ANSWER_8 = 2
+    QUIZ_TYPE_B_ANSWER_9 = 3
+
+
+############################################################################################################
+#                                                 SUBSESSION                                               #
+############################################################################################################
+class Subsession(BaseSubsession):
+    left_red_marbles_majority_0 = models.BooleanField()
+    number_left_urn_triangle = models.IntegerField(initial=0)
+    number_left_urn_square = models.IntegerField(initial=0)
+
+
+############################################################################################################
+#                                                   GROUP                                                  #
+############################################################################################################
+class Group(BaseGroup):
+    pass
+
+
+############################################################################################################
+#                                                   PLAYER                                                 #
+############################################################################################################
+class Player(BasePlayer):
+    ########################################################################################################
+    #                                               CONSENT                                                #
+    ########################################################################################################
+    """On the first page 'Consent' we ask for participation consent;
+     Consent is a boolean; Participant agrees = 1, participant disagrees = 0.
+     Depending on whether they agree or disagree, they will reach a different next page.
+     Participants who disagree will reach the page 'ConsentDisagree' which is the last page for them."""
+    consent = models.BooleanField()
+    ########################################################################################################
+    #                                          INSTRUCTIONS ORDER                                          #
+    ########################################################################################################
+    """The following variable is only relevant for the instructions. It concerns the order in which Type B participants
+    are shown the example compositions of the urns where I explain to them that everyone faces the same two urns.
+    My supervisors suggested that it makes sense to randomize this order on the participant level to avoid
+    any potential anchor effect. I assign values to this field in 'creating_session'. """
+    order_same_urns = models.BooleanField()
+    ########################################################################################################
+    #                                              URN CHOICE                                              #
+    ########################################################################################################
+    """Urn choice field to register urn choices on the player/participant level:"""
+    urn_choice = models.BooleanField(required=True, default=None)
+    ########################################################################################################
+    #                                        COLOR OF THE DRAWN marbleS                                      #
+    ########################################################################################################
+    color_drawn_marble_left = models.StringField()  # this is for example block in instructions
+    color_drawn_marble_right = models.StringField()  # this is for example block in instructions
+    color_drawn_marble = models.StringField()  # this is for actual experiment
+    ########################################################################################################
+    #                                      MEMORIZE MULTI-DIGIT NUMBER                                     #
+    ########################################################################################################
+    """Only relevant for type B participants with treatment cognitive load = 1:"""
+    memorize_number = models.StringField()  # This is used to assign individually generated random numbers
+    insert_memorize_number = models.StringField(blank=True)  # this is the field to register the numbers that participant enter
+    memorized_correctly = models.BooleanField(default=None)  # this is to register whether a participant has memorized the number correctly
+    ########################################################################################################
+    #                                               TREATMENTS                                             #
+    ########################################################################################################
+    """The first field here called "treatment_assignment" is only needed temporarily to assign treatment sequences. 
+    Then, based on this sequence, players will be assigned values for their treatment fields "similar_ingroup" and "observing_ingroup"."""
+    treatment_assignment = models.StringField()
+    cognitive_load = models.BooleanField()  # I assign values in 'creating_session' function
+    similar_ingroup = models.FloatField()  # I assign values in 'creating_session' function
+    observing_ingroup = models.BooleanField()  # I assign values in 'creating_session' function
+    ########################################################################################################
+    #                                      TYPE AND GROUP ASSIGNMENT                                       #
+    ########################################################################################################
+    """Note: 'type' has already a function associated with it and thus, it's better to use a different term:"""
+    type_assignment = models.StringField()
+    """Note:'group' has already a function associated with it and thus, it's better to use a different term:"""
+    group_assignment = models.StringField()
+    ########################################################################################################
+    #                                            QUIZ QUESTIONS                                            #
+    ########################################################################################################
+    """Below I define the quiz questions. All 9 of them have to be answered by type B participants. Only 
+    part of them have to be answered by Type A participants."""
+    question1 = models.IntegerField(
+        choices=[
+            [1, 'a) The right urn has 3 red marbles and 1 blue marble.'],
+            [2, 'b) The right urn has 2 red marbles and 2 blue marbles.'],
+            [3, 'c) The right urn has 1 red marble and 3 blue marbles.'],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question2 = models.IntegerField(
+        choices=[
+            [
+                1,
+                'a) Yes, I always get points for the same color as type A participants of my own group.',
+            ],
+            [
+                2,
+                'b) No, I never get points for the same color as type A participants of my own group.',
+            ],
+            [
+                3,
+                'c) Yes, I get points for the same color of marbles as type A participants of my own group with a '
+                'probability of 10%.',
+            ],
+            [
+                4,
+                'd) Yes, I get points for the same color of marbles as type A participants of my own group with a '
+                'probability of 90%.',
+            ],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question3 = models.IntegerField(
+        choices=[
+            [1, 'a) Yes, my group membership and my type assignment can change after 10 blocks.'],
+            [
+                2,
+                'b) No, my group membership and my type assignment does not change throughout the whole study.',
+            ],
+            [3, 'c) Yes, my group membership and my type assignment can change after every block.'],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question4 = models.IntegerField(
+        choices=[
+            [
+                1,
+                'a) Type A participants of both groups, the triangle and the square group, receive points for blue.',
+            ],
+            [
+                2,
+                'b) Type A participants of the triangle group and type A participants of the square group receive '
+                'points for opposite colors.',
+            ],
+            [
+                3,
+                'c) Type A participants of both groups, the triangle and the square group, receive points for red.',
+            ],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question5 = models.IntegerField(
+        choices=[
+            [1, 'a) Yes, every participant chooses from the same one pair of urns.'],
+            [2, 'b) No, every participant chooses from a different pair of urns.'],
+            [
+                3,
+                'c) No, all type A participants choose from one pair of urns and all type B participants choose from a '
+                'different pair of urns.',
+            ],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question6 = models.IntegerField(
+        choices=[
+            [1, 'a) 1 round'],
+            [2, 'b) 4 rounds'],
+            [3, 'c) 10 rounds'],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question7 = models.IntegerField(
+        choices=[
+            [
+                1,
+                'a) I will see the sum of points earned by each Type A participant in their 4th round.',
+            ],
+            [
+                2,
+                'b) I will see the number of type A participants of either the triangle or square group who have '
+                'chosen the left and right urn in their first round of a given block.',
+            ],
+            [
+                3,
+                'c) I will see the number of type A participants of either the triangle or square group who have '
+                'chosen the left and right urn in their 4th, and thus last round of a given block.',
+            ],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question8 = models.IntegerField(
+        choices=[
+            [1, 'a) The two urns are shuffled after every round of the 4 rounds in a given block.'],
+            [
+                2,
+                'b) The two urns are shuffled at the start of every block and then remain in this same position '
+                'until the end of a given block.',
+            ],
+            [
+                3,
+                'c) The two urns are shuffled at the start of the first block and then they remain in this same '
+                'position until the last block.',
+            ],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    question9 = models.IntegerField(
+        choices=[
+            [1, 'a) 1 time'],
+            [2, 'b) 20 times'],
+            [3, 'c) 4 times'],
+        ],
+        widget=widgets.RadioSelect,
+        label="",
+    )
+    ########################################################################################################
+    #                                      POST EXPERIMENT QUESTIONNAIRE                                   #
+    ########################################################################################################
+    # Question 1
+    q1 = make_field('When choosing between the two urns, did you spend a lot of time on your choice or only very little '
+                    '(1=very little time, 7=a lot of time)?')
+    # Question 2
+    q2 = make_field('How difficult was it for you to recall your numbers (1=very difficult, 7=not very difficult)?')
+    # Question 3
+    q3 = make_field('How difficult was it for you to decide between the two urns (1=very difficult, 7=not very difficult)?')
+    # Question 4
+    q4 = make_field('How distracting was the memorization task (1=very distracting, 7=not very distracting)?')
+    # Question 5
+    q5 = make_field('How many of the memorization tasks do you expect that you correctly answered (1=none correct, 7=all correct)?')
+    # Question 6
+    q6 = models.IntegerField(
+        min=0, max=100,
+        label="How did you allocate your cognitive resources between the memorization task and the urn choice task "
+              "(0=all focus on memorizing, 100=all focus on urn choice task)?",
+    )
+    # Question 7
+    q7 = make_field('When progressing through the 20 blocks, did it get harder to choose between the two urns or easier or did the '
+                    'difficulty not change at all (1=it got harder, 4=no change, 7=it got easier)?')
+    # Question 8
+    q8 = make_field('When progressing through the 20 blocks, did it get harder to memorize the multi digit number or easier or did the '
+                    'difficulty not change at all (1=it got harder, 4=no change, 7=it got easier)?')
+
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+#                                               FUNCTIONS                                                  #
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+
+############################################################################################################
+############################################################################################################
+#                                            SESSION FUNCTION                                              #
+############################################################################################################
+############################################################################################################
+def creating_session(subsession: Subsession):
+    import itertools
+    """This function will automatically be executed when a new session is started"""
+    if subsession.round_number == 1:
+        """Print round number"""
+        print('round number:', subsession.round_number)
+        ############################################################################################################
+        ############################################################################################################
+        #                                      CREATE LIST WITH BLOCK NUMBERS                                      #
+        ############################################################################################################
+        ############################################################################################################
+        block_number = subsession.session.config['block_number']
+        subsession.session.block_number = block_number
+        print(
+            'This is just to prove that I managed to access the empty list "block_number=[]" created in SESSION_CONFIGS and store it'
+            'under a session variable now:',
+            subsession.session.block_number,
+        )
+        ############################################################################################################
+        ############################################################################################################
+        #                                      CREATE LIST WITH SHUFFLED URNS                                      #
+        ############################################################################################################
+        ############################################################################################################
+        import random
+        red_marbles_majority = subsession.session.config['red_marbles_majority']
+        subsession.session.red_marbles_majority = red_marbles_majority
+        print(
+            'This is just to prove that I managed to access the empty list "red_marbles_majority=[]" created in SESSION_CONFIGS and store it'
+            'under a session variable now:',
+            subsession.session.red_marbles_majority,
+        )
+        n_blocks = int(C.NUM_ROUNDS / C.NUM_ROUNDS_BLOCK)
+        print('n_blocks:', n_blocks)
+        """Generate vector with urn shuffling. In particular, I create a list of randomly selected 0s and 1s (with equal probability) to
+        determine for every of the 20 blocks the composition of the two sets of marbles. 0 means that there is a majority of red marbles in the
+        LEFT urn and 1 means that there is a majority of red marbles in the RIGHT urn. I append the above created session variable called
+        subsession.session.red_marbles_majority."""
+        urn_shuffling_results = [None] * n_blocks
+        for block in range(0, n_blocks):
+            urn_shuffling_results[block] = random.randint(0, 1)
+            subsession.session.red_marbles_majority.append(urn_shuffling_results[block])
+        print('urn_shuffling_results', urn_shuffling_results)
+        print('subsession.session.red_marbles_majority', subsession.session.red_marbles_majority)
+        ############################################################################################################
+        ############################################################################################################
+        #                  ACCESS OTHER SESSIONS_CONFIGS VARIABLES AND STORE THEM UNDER SESSION VARIABLES          #
+        ############################################################################################################
+        ############################################################################################################
+        """Get winning color for triangle from SESSION_CONFIGS in settings.py and store it in a session variable.
+            This is a parameter that we might change across sessions. We can always access the variable value by
+            typing 'subsession.session.winning_color_triangle' or on templates with either;
+            {{ session.config.winning_color_triangle }} or; {{ session.winning_color_triangle }},
+            e.g. if we want to show certain images, based on the condition whether the winning color for triangle is red or
+            blue (note, the winning color for square is always the opposite, i.e. if the winning color for triangle is red,
+            the winning color for square is blue."""
+        winning_color_triangle = subsession.session.config['winning_color_triangle']
+        subsession.session.vars['winning_color_triangle'] = winning_color_triangle
+        print(
+            'Winning color of triangle type A participants:',
+            subsession.session.vars['winning_color_triangle'],
+        )
+        winning_color_square = 'blue' if winning_color_triangle == 'red' else 'red'
+        subsession.session.vars['winning_color_square'] = winning_color_square
+        print(
+            'Winning color of square type A participants:',
+            subsession.session.vars['winning_color_square'],
+        )
+        """We have defined the length of the multi-digit number that the social learners in the cognitive load treatment have to memorize.
+        Like we did above for the winning color, we store this length of the multi-digit number now as a session variable:"""
+        length_multi_digit = subsession.session.config['length_multi_digit']
+        subsession.session.length_multi_digit = length_multi_digit
+        print(
+            'The length of the multi-digit number that social learners in the cognitive load treatment have to memorize in this session is:',
+            subsession.session.length_multi_digit,
+        )
+        """Store number of individual learners (Type A) by accessing it in settings.py under SESSION_CONFIGS:"""
+        nbr_individual_learners = subsession.session.config['nbr_individual_learners']
+        subsession.session.nbr_individual_learners = nbr_individual_learners
+        print('number of individual learners:', subsession.session.nbr_individual_learners)
+        """Now I define what should only happen in the first round of this app. This consists of assigning group, type,
+            and treatments. And because I will store it under participant variables, I can access these values throughout
+            the whole session (i.e. across multiple apps):"""
+        ############################################################################################################
+        ############################################################################################################
+        #                                       TYPE AND GROUP ASSIGNMENTS                                         #
+        ############################################################################################################
+        ############################################################################################################
+        """Type Assignment:"""
+        """Note, I only need 10 individual learners (5 in the triangle group and 5 in the square group). I stored the number of individual
+        learners that we use in the experiment in the SESSION_CONFIGS in settings.py file and I stored this number further above under the 
+        variable name 'nbr_individual_learners':"""
+        for player in subsession.get_players():
+            print('player id:', player.id)
+            participant = player.participant
+            if participant.id_in_session <= nbr_individual_learners:
+                player.type_assignment = C.TYPE_A
+                participant.type_assignment = player.type_assignment
+            else:
+                player.type_assignment = C.TYPE_B
+                participant.type_assignment = player.type_assignment
+        """Create list with all Type_B players"""
+        type_a_participants = [p for p in subsession.get_players() if p.participant.type_assignment == C.TYPE_A]
+        """Create list with all Type_B players"""
+        type_b_participants = [p for p in subsession.get_players() if p.participant.type_assignment == C.TYPE_B]
+        """Group Assignment:"""
+        """First within type A participants:"""
+        groups_for_type_a = itertools.cycle([C.GROUP_TRIANGLE, C.GROUP_SQUARE])
+        for player in type_a_participants:
+            participant = player.participant
+            player.group_assignment = next(groups_for_type_a)
+            participant.group_assignment = player.group_assignment
+        """Now within type B participants:"""
+        groups_for_type_b = itertools.cycle([C.GROUP_TRIANGLE, C.GROUP_SQUARE])
+        for player in type_b_participants:
+            participant = player.participant
+            player.group_assignment = next(groups_for_type_b)
+            participant.group_assignment = player.group_assignment
+        ############################################################################################################
+        ############################################################################################################
+        #                                            ORDER SAME URNS                                               #
+        ############################################################################################################
+        ############################################################################################################
+        """The following is only relevant for the instructions. It concerns the order in which Type B participants
+        are shown the example compositions of the urns where I explain to them that everyone faces the same two urns.
+        My supervisors suggested that it makes sense to randomize this order on the participant level to avoid
+        any potential anchor effect."""
+        order_same_urns_left_urn_red_majority = itertools.cycle([0, 1])
+        for player in type_b_participants:
+            player.order_same_urns = next(order_same_urns_left_urn_red_majority)
+        ############################################################################################################
+        ############################################################################################################
+        #                                           TREATMENT ASSIGNMENTS                                          #
+        ############################################################################################################
+        ############################################################################################################
+
+        ############################################################################################################
+        #                                              COGNITIVE LOAD                                              #
+        ############################################################################################################
+        """ Now assign players randomly to treatments. Do it balanced with 'itertools', so that an equal amount of 
+        players get assigned to all treatment combinations.
+        IMPORTANT: Save the treatment on the participant level so that we can access it throughout the session."""
+        """1. Random assignment of between-subjects treatment cognitive load, with 0 = 'no cognitive load' and 
+        1 = 'cognitive load':"""
+        treatment_cognitive_load = itertools.cycle([0, 1])
+        for player in type_b_participants:
+            participant = player.participant
+            player.cognitive_load = next(treatment_cognitive_load)
+            participant.cognitive_load = player.cognitive_load
+        """To have balanced treatment assignment within the different cognitive load treatments, I need to first create
+        two lists including the participants with cognitive_load = 1 and cognitive_load = 0. Then within these two 
+        groups, I will do the treatment assignment of the similar_ingroup treatment."""
+        """Create list with all Type_B players"""
+        cognitive_load_0_participants = [p for p in type_b_participants if p.participant.cognitive_load == 0]
+        """Create list with all Type_B players"""
+        cognitive_load_1_participants = [p for p in type_b_participants if p.participant.cognitive_load == 1]
+        ############################################################################################################
+        #                                           PERMUTATION NUMBER                                             #
+        ############################################################################################################
+        """We decided to do both, similarity 0.1/0.9 and ingroup/outgroup, within subjects. And we do four groups of 5
+        blocks. E.g., 5 blocks: similarity 0.1 & ingroup, then 5 blocks: similarity 0.1 & outgroup, then 5 blocks:
+        similarity 0.9 & ingroup, then 5 blocks: similarity 0.9 & outgroup. We can calculate the number of possible permutations like so:
+        P(n,r) = n!/(n-r!), where P="Permutations", n=number of treatment combinations=4, and r=number of block-groups=4. Thus, we have:
+        P=4!/(4-4!)=24. There are 24 possible permutations of these 4x5 blocks. Below we assign every participant an integer that is an 
+        element of the interval = [1,24]. Every integer stands for one of the 24 possible permutations and we counterbalance those across
+        subjects. Specifically, we counterbalance them across social learners in the cognitive load treatment and across social learners in 
+        the no-cognitive load treatment. Later we will assign players/participants treatment values of their treatment fields; 
+        similar_ingroup and observing_ingroup based on their treatment integer (element in [1,24]) at the beginning of every round. 
+        Every five rounds, new treatment values have to be assigned."""
+
+        numbers = range(1, 25)
+
+        permutation_number = [number for number in numbers]
+
+        """Assign permutation number to participants in the no-cognitive load treatment:"""
+
+        treatment_assign = itertools.cycle(permutation_number)
+        for player in cognitive_load_0_participants:
+            participant = player.participant
+            participant.treatment_assignment = next(treatment_assign)
+            print('participant.treatment_assignment', participant.treatment_assignment)
+
+        """Assign permutation number to participants in the cognitive load treatment:"""
+
+        treatment_assign = itertools.cycle(permutation_number)
+        for player in cognitive_load_1_participants:
+            participant = player.participant
+            participant.treatment_assignment = next(treatment_assign)
+            print('participant.treatment_assignment', participant.treatment_assignment)
+
+        ############################################################################################################
+        #                                SESSION VARIABLE: TREATMENT PERMUTATIONS                                  #
+        ############################################################################################################
+
+        treatment_combinations = [(0.9, 1), (0.9, 0), (0.1, 1), (0.1, 0)]
+
+        permutations_treatment_combinations = list(itertools.permutations(treatment_combinations))
+
+        print('length permutations_treatment_combinations', len(permutations_treatment_combinations))
+
+        permut_treat_combinations = subsession.session.config['permut_treat_combinations']
+        subsession.session.permut_treat_combinations = permut_treat_combinations
+        print(
+            'This is just to prove that I managed to access the empty list "permutations_treatment_combinations=[]" created in '
+            'SESSION_CONFIGS and store it under a session variable now:',
+            subsession.session.permut_treat_combinations,
+        )
+
+        subsession.session.permut_treat_combinations = permutations_treatment_combinations
+        
+        print('all permutations_treatment_combinations', permutations_treatment_combinations)
+        
+
+        """For every participant, we create a sequence of 4x5 blocks with one of the 24 possible sequences. We counterbalance these 24
+        possible sequences across social learners within sessions."""
+        treatment_sequence = [None] * int(C.NUM_ROUNDS / C.NUM_ROUNDS_BLOCK)
+
+        """2. Random assignment of between-subjects treatment similarity, with 'similar_ingroup = 0.9' meaning
+        90% probability of sharing winning color with ingroup demonstrators, and 'similar_ingroup = 0.1'
+        meaning = 10% probability of sharing winning color with ingroup demonstrators."""
+        """Within participants with cognitive_load = 0:"""
+        treatment_similarity = itertools.cycle([0.1, 0.9])
+        for player in cognitive_load_0_participants:
+            participant = player.participant
+            player.similar_ingroup = next(treatment_similarity)
+            participant.similar_ingroup = player.similar_ingroup
+        """Now within participants with cognitive_load = 1:"""
+        treatment_similarity = itertools.cycle([0.1, 0.9])
+        for player in cognitive_load_1_participants:
+            participant = player.participant
+            player.similar_ingroup = next(treatment_similarity)
+            participant.similar_ingroup = player.similar_ingroup
+        """Now before assigning the third treatment, again create 4 groups according to the treatment combinations
+        between cognitive_load 0/1 and similar_ingroup 0.1/0.9 and then within those 4 groups, again assign treatment
+        of 'ingroup' in a balanced way within those 4 groups."""
+        """Create list with all Type_B players with cognitive_load = 0 and similar_ingroup = 0.1:"""
+        cognitive_load_0_similar_ingroup_01 = [p for p in type_b_participants if
+                                               p.participant.cognitive_load == 0 and p.participant.similar_ingroup == 0.1]
+        """Create list with all Type_B players with cognitive_load = 0 and similar_ingroup = 0.9:"""
+        cognitive_load_0_similar_ingroup_09 = [p for p in type_b_participants if
+                                               p.participant.cognitive_load == 0 and p.participant.similar_ingroup == 0.9]
+        """Create list with all Type_B players with cognitive_load = 1 and similar_ingroup = 0.1:"""
+        cognitive_load_1_similar_ingroup_01 = [p for p in type_b_participants if
+                                               p.participant.cognitive_load == 1 and p.participant.similar_ingroup == 0.1]
+        """Create list with all Type_B players with cognitive_load = 1 and similar_ingroup = 0.9:"""
+        cognitive_load_1_similar_ingroup_09 = [p for p in type_b_participants if
+                                               p.participant.cognitive_load == 1 and p.participant.similar_ingroup == 0.9]
+        """3. Random within session assignment (but balanced) of within-subjects treatment, which is observing
+        ingroup/outgroup, with 'ingroup = 1' meaning that participant will observe ingroup, and 'ingroup = 0' meaning that 
+        participant will observe outgroup demonstrators. 
+        Do this for all four lists of participants created above:"""
+        """Treatment assignment within cognitive_load_0_similar_ingroup_01:"""
+        treatment_ingroup_outgroup = itertools.cycle([0, 1])
+        for player in cognitive_load_0_similar_ingroup_01:
+            participant = player.participant
+            player.observing_ingroup = next(treatment_ingroup_outgroup)
+            participant.observing_ingroup = player.observing_ingroup
+        """Treatment assignment within cognitive_load_0_similar_ingroup_09:"""
+        treatment_ingroup_outgroup = itertools.cycle([0, 1])
+        for player in cognitive_load_0_similar_ingroup_09:
+            participant = player.participant
+            player.observing_ingroup = next(treatment_ingroup_outgroup)
+            participant.observing_ingroup = player.observing_ingroup
+        """Treatment assignment within cognitive_load_1_similar_ingroup_01:"""
+        treatment_ingroup_outgroup = itertools.cycle([0, 1])
+        for player in cognitive_load_1_similar_ingroup_01:
+            participant = player.participant
+            player.observing_ingroup = next(treatment_ingroup_outgroup)
+            participant.observing_ingroup = player.observing_ingroup
+        """Treatment assignment within cognitive_load_1_similar_ingroup_09:"""
+        treatment_ingroup_outgroup = itertools.cycle([0, 1])
+        for player in cognitive_load_1_similar_ingroup_09:
+            participant = player.participant
+            player.observing_ingroup = next(treatment_ingroup_outgroup)
+            participant.observing_ingroup = player.observing_ingroup
+        """ Print the list of players and their treatment assignment"""
+        for player in subsession.get_players():
+            print('every player and their treatment assignments:', player)
+        ############################################################################################################
+        ############################################################################################################
+        #                                           SET GROUP MATRIX                                               #
+        ############################################################################################################
+        ############################################################################################################
+        """I have to do the following grouping only because 'Waitpages' in oTree only work based on such grouping.
+        Note again, this 'grouping' is not the same as the groups in my experiment (triangle and square). It is just
+        a coincidence that groups here in oTree refer to the "Types" (A and B) in my experiment rather than to the 
+        "Groups"."""
+        group_matrix = [type_a_participants, type_b_participants]
+        subsession.set_group_matrix(group_matrix)
+    else:
+        subsession.group_like_round(1)
+
+
+############################################################################################################
+############################################################################################################
+#                                            GROUP FUNCTIONS                                               #
+############################################################################################################
+############################################################################################################
+
+
+############################################################################################################
+#                                        DETERMINE COLOR OF DRAWN marble                                     #
+############################################################################################################
+def determine_color_drawn_marble_practice_block(group: Group):
+    """Function to randomize urn composition and determine color of marble drawn for every player:"""
+    """For the practice block of type A participants, we specify in the following which urn has which composition of
+    marbles; Whether there are 3 red / 1 blue in the left / right urn and vice versa; Whether there are 1 red / 3 blue
+    in the left / right urn. I do this with the 'numpy' package which I import below under the name 'np'. 
+    IMPORTANT: ONLY USE random.seed() FOR TESTING PURPOSES AS IT WILL CAUSE THE RANDOM INT GENERATOR TO ALWAYS GENERATE THE SAME INT."""
+    # random.seed(123)
+    import numpy as np
+    red_marbles_majority_practice_block = np.random.uniform(0, 1)
+    print('If "red_marbles_majority_practice_block" is < 0.5, then the left urn contains 3 red / 1 blue marble. If '
+          '"red_marbles_majority_practice_block" is >= 0.5, the right urn contains this set of 3 red / 1 blue marble.')
+    print('random number from uniform dist "red_marbles_majority_practice_block" is = ', red_marbles_majority_practice_block)
+    if red_marbles_majority_practice_block >= 0.5:
+        print(
+            'there is a majority of red marbles in the RIGHT urn because the value',
+            red_marbles_majority_practice_block,
+            'is >= 0.5',
+        )
+    else:
+        print(
+            'there is a majority of red marbles in the LEFT urn because the value',
+            red_marbles_majority_practice_block,
+            'is < 0.5',
+        )
+    """Specify the color of the marble that is drawn from the left and right urn. A random.seed(123) as specified above
+     generates a value of > 0.5 and thus, the right urn will contain 3 red / 1 marble. In that case, the probability of
+     drawing a red marble in the right urn is 75%.  It's the opposite probability in the left urn; 25%. Accordingly, the probability
+     of drawing a blue marble in the right urn is 25% and  it's the opposite probability in the left urn; 75%."""
+    for p in group.get_players():
+        if red_marbles_majority_practice_block >= 0.5:
+            marble_left_urn = np.random.uniform(0, 1)
+            print('The probability of drawing "red" marble from the left urn is only 25%. Thus, only if the random number drawn from uniform'
+                  'dist stored under variable "marble_left_urn" for the focal player is > 0.75, then the color is red, otherwise its blue')
+            print(
+                'value of "marble_left_urn" for participant with id',
+                p.participant.id_in_session,
+                'is:',
+                marble_left_urn,
+            )
+            if marble_left_urn <= 0.75:
+                p.participant.color_drawn_marble_left = 'blue'
+                print(
+                    'because the value of "marble_left_urn" shown above is <= 0.75, the color of the marble that would be drawn '
+                    'from the left urn, if the focal participant chooses the left urn, is:',
+                    p.participant.color_drawn_marble_left,
+                )
+            else:
+                p.participant.color_drawn_marble_left = 'red'
+                print(
+                    'because the value of "marble_left_urn" shown above is > 0.75, the color of the marble that would be drawn '
+                    'from the left urn, if the focal participant chooses the left urn, is:',
+                    p.participant.color_drawn_marble_left,
+                )
+            marble_right_urn = np.random.uniform(0, 1)
+            print('The probability of drawing a "red" marble from the right urn is 75%. Thus, if the random number drawn from uniform '
+                  'dist stored under variable "marble_right_urn" for the focal player is <= 0.75, then the color is red, otherwise its blue')
+            print(
+                'value of "marble_right_urn" for participant with id',
+                p.participant.id_in_session,
+                'is:',
+                marble_right_urn,
+            )
+            if marble_right_urn <= 0.75:
+                p.participant.color_drawn_marble_right = 'red'
+                print(
+                    'because the value of "marble_right_urn" shown above is <= 0.75, the color of the marble that would be drawn '
+                    'from the right urn, if the focal participant chooses the right urn, is:',
+                    p.participant.color_drawn_marble_right,
+                )
+            else:
+                p.participant.color_drawn_marble_right = 'blue'
+                print(
+                    'because the value of "marble_right_urn" shown above is > 0.75, the color of the marble that would be drawn '
+                    'from the right urn, if the focal participant chooses the right urn, is:',
+                    p.participant.color_drawn_marble_right,
+                )
+        else:
+            marble_drawn_left_urn_when_left_urn_red_majority = np.random.uniform(0, 1)
+            print('The probability of drawing a "red" marble from the left urn is 75%. Thus, if the random number drawn from uniform '
+                  'dist stored under variable "marble_drawn_left_urn_when_left_urn_red_majority" for the focal player is <= 0.75, then the '
+                  'color of the drawn marble is red, otherwise its blue')
+            print(
+                'value of "marble_drawn_left_urn_when_left_urn_red_majority" for participant with id',
+                p.participant.id_in_session,
+                'is:',
+                marble_drawn_left_urn_when_left_urn_red_majority,
+            )
+            if marble_drawn_left_urn_when_left_urn_red_majority <= 0.75:
+                p.participant.color_drawn_marble_left = 'red'
+                print(
+                    'because the value of "marble_drawn_left_urn_when_left_urn_red_majority" shown above is <= 0.75, the color of the marble '
+                    'that would be drawn from the left urn, if the focal participant chooses the left urn, is:',
+                    p.participant.color_drawn_marble_left,
+                )
+            else:
+                p.participant.color_drawn_marble_left = 'blue'
+                print(
+                    'because the value of "marble_drawn_left_urn_when_left_urn_red_majority" shown above is > 0.75, the color of the marble '
+                    'that would be drawn from the left urn, if the focal participant chooses the left urn, is:',
+                    p.participant.color_drawn_marble_left,
+                )
+            marble_drawn_right_urn_when_left_urn_red_majority = np.random.uniform(0, 1)
+            print('The probability of drawing a "red" marble from the right urn is only 25%. Thus, only if the random number drawn from '
+                  'uniform dist stored under variable "marble_drawn_right_urn_when_left_urn_red_majority" for the focal player is > 0.75, '
+                  'then the color is red, otherwise its blue')
+            print(
+                'value of "marble_drawn_right_urn_when_left_urn_red_majority" for participant with id',
+                p.participant.id_in_session,
+                'is:',
+                marble_drawn_right_urn_when_left_urn_red_majority,
+            )
+            if marble_drawn_right_urn_when_left_urn_red_majority <= 0.75:
+                p.participant.color_drawn_marble_right = 'blue'
+                print(
+                    'because the value of "marble_right_urn" shown above is <= 0.75, the color of the marble that would be drawn '
+                    'from the right urn, if the focal participant chooses the right urn, is:',
+                    p.participant.color_drawn_marble_right,
+                )
+            else:
+                p.participant.color_drawn_marble_right = 'red'
+                print(
+                    'because the value of "marble_right_urn" shown above is > 0.75, the color of the marble that would be drawn '
+                    'from the right urn, if the focal participant chooses the right urn, is:',
+                    p.participant.color_drawn_marble_right,
+                )
+
+
+def color_and_payoff_type_a(group):
+    import numpy as np
+    for p in group.get_players():
+        round_number = p.round_number
+        print('round number:', round_number)
+        participant = p.participant
+        print('participant:', participant)
+        if round_number <= 4:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[0]
+        elif 4 < round_number <= 8:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[1]
+        elif 8 < round_number <= 12:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[2]
+        elif 12 < round_number <= 16:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[3]
+        elif 16 < round_number <= 20:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[4]
+        elif 20 < round_number <= 24:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[5]
+        elif 24 < round_number <= 28:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[6]
+        elif 28 < round_number <= 32:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[7]
+        elif 32 < round_number <= 36:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[8]
+        elif 36 < round_number <= 40:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[9]
+        elif 40 < round_number <= 44:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[10]
+        elif 44 < round_number <= 48:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[11]
+        elif 48 < round_number <= 52:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[12]
+        elif 52 < round_number <= 56:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[13]
+        elif 56 < round_number <= 60:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[14]
+        elif 60 < round_number <= 64:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[15]
+        elif 64 < round_number <= 68:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[16]
+        elif 68 < round_number <= 72:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[17]
+        elif 72 < round_number <= 76:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[18]
+        elif 76 < round_number <= 80:
+            red_marbles_majority = p.subsession.session.red_marbles_majority[19]
+        print('red_marbles_majority in this round is;',
+              red_marbles_majority,
+              'and recall that if red_marbles_majority = 0 we have a majority of red marbles in the left urn and if red_marbles_majority = 1 '
+              'we have a majority of red marbles in the right urn.')
+        p.subsession.session.left_red_marbles_majority_0 = red_marbles_majority
+        p.subsession.left_red_marbles_majority_0 = red_marbles_majority
+        print('And every round, we store this value of red_marbles_majority on the session variable left_red_marbles_majority_0 and to check '
+              'whether it worked, we print p.subsession.session.left_red_marbles_majority_0 here:'
+              , p.subsession.session.left_red_marbles_majority_0)
+        print('and test whether we can also access it under p.session.left_red_marbles_majority_0:', p.session.left_red_marbles_majority_0)
+        print('and test whether we can also access it under p.subsession.left_red_marbles_majority_0:',
+              p.subsession.left_red_marbles_majority_0)
+        probability_draw_red_marble = None
+        """If there is a majority of red marbles in the left urn (red_marbles_majority=0) then the probability of drawing a red marble from
+        the left urn (participant.urn_choice = 0) is 0.75 and from the right urn it's 0.25. Vice versa for when the majority of red
+        marbles is in the right urn (red_marbles_majority=1):"""
+        if red_marbles_majority == 0:
+            if participant.urn_choice == 0:
+                probability_draw_red_marble = 0.75
+                print('This player has chosen the LEFT urn and thus, the probability of drawing a red marble is 75% because there is a '
+                      'majority of red marbles in the LEFT urn.')
+            elif participant.urn_choice == 1:
+                probability_draw_red_marble = 0.25
+                print('This player has chosen the RIGHT urn and thus, the probability of drawing a red marble is 25% because there is a '
+                      'majority of red marbles in the LEFT urn, and hence, a majority of blue marbles in the RIGHT urn.')
+        elif red_marbles_majority == 1:
+            if participant.urn_choice == 0:
+                probability_draw_red_marble = 0.25
+                print('This player has chosen the LEFT urn and thus, the probability of drawing a red marble is 25% because there is a '
+                      'majority of red marbles in the RIGHT urn, and hence, a majority of blue marbles in the LEFT urn.')
+            elif participant.urn_choice == 1:
+                probability_draw_red_marble = 0.75
+                print('This player has chosen the RIGHT urn and thus, the probability of drawing a red marble is 75% because there is a '
+                      'majority of red marbles in the RIGHT urn.')
+        """Draw random random from uniform distribution for the player and see whether it's <= the probability of drawing a red marble:"""
+        marble_drawn = np.random.uniform(0, 1)
+        print('value of marble_drawn is:', marble_drawn)
+        if marble_drawn <= probability_draw_red_marble:
+            p.color_drawn_marble = 'red'
+            participant.color_drawn_marble = p.color_drawn_marble
+            print(
+                'Because value of "marble_drawn" shown above is <= 0.75, color of marble drawn from left urn is:',
+                p.participant.color_drawn_marble,
+            )
+            """Calculate payoffs and store them under player variable. Player class has an automatic payoff field. And participant has an
+            automatic payoff field, that will automatically sum over all player.payoffs, so I don't have to store payoff in a participant
+            field additionally:"""
+            if p.participant.group_assignment == C.GROUP_TRIANGLE:
+                if p.participant.color_drawn_marble == p.subsession.session.winning_color_triangle:
+                    p.payoff = p.payoff + 100
+                else:
+                    p.payoff = p.payoff + 0
+            elif p.participant.group_assignment == C.GROUP_SQUARE:
+                if p.participant.color_drawn_marble == p.subsession.session.winning_color_square:
+                    p.payoff = p.payoff + 100
+                else:
+                    p.payoff = p.payoff + 0
+        else:
+            p.color_drawn_marble = 'blue'
+            participant.color_drawn_marble = p.color_drawn_marble
+            print(
+                'Because value of "marble_drawn" shown above is > 0.75, color of marble drawn from left urn is:',
+                p.participant.color_drawn_marble,
+            )
+            if p.participant.group_assignment == C.GROUP_TRIANGLE:
+                if p.participant.color_drawn_marble == p.subsession.session.winning_color_triangle:
+                    p.payoff = p.payoff + 100
+                else:
+                    p.payoff = p.payoff + 0
+            elif p.participant.group_assignment == C.GROUP_SQUARE:
+                if p.participant.color_drawn_marble == p.subsession.session.winning_color_square:
+                    p.payoff = p.payoff + 100
+                else:
+                    p.payoff = p.payoff + 0
+
+
+def choice_distribution(subsession: Subsession):
+    if subsession.round_number % 4 == 0:
+        number_left_urn_triangle = subsession.number_left_urn_triangle
+        print('subsession.number_left_urn_triangle', number_left_urn_triangle)
+        number_left_urn_square = subsession.number_left_urn_square
+        print('subsession.number_left_urn_square', number_left_urn_square)
+        for p in subsession.get_players():
+            participant = p.participant
+            print('type of focal player:', participant.type_assignment)
+            print('group of focal player:', participant.group_assignment)
+            if p.participant.group_assignment == C.GROUP_TRIANGLE:
+                if p.participant.urn_choice == 0:
+                    number_left_urn_triangle = number_left_urn_triangle + 1
+                    subsession.number_left_urn_triangle = number_left_urn_triangle
+                else:
+                    number_left_urn_triangle = number_left_urn_triangle + 0
+                    subsession.number_left_urn_triangle = number_left_urn_triangle
+            elif p.participant.group_assignment == C.GROUP_SQUARE:
+                if p.participant.urn_choice == 0:
+                    number_left_urn_square = number_left_urn_square + 1
+                    subsession.number_left_urn_square = number_left_urn_square
+                else:
+                    number_left_urn_square = number_left_urn_square + 0
+                    subsession.number_left_urn_square = number_left_urn_square
+        print('subsession.number_left_urn_triangle', subsession.number_left_urn_triangle)
+        print('subsession.number_left_urn_square', subsession.number_left_urn_square)
+
+############################################################################################################
+############################################################################################################
+#                                            PLAYER FUNCTIONS                                              #
+############################################################################################################
+############################################################################################################
+
+
+############################################################################################################
+#                                              CUSTOM EXPORT                                               #
+############################################################################################################
+# From https://otree.readthedocs.io/en/latest/admin.html?highlight=custom_export#custom-data-exports:
+"""
+You can make your own custom data export for an app. In oTree Studio, go to the “Player” model and click on 
+“custom_export” at the bottom. (If using a text editor, define the below function.) The argument players is a queryset 
+of all the players in the database. Use a yield for each row of data.
+
+def custom_export(players):
+    # header row
+    yield ['session', 'participant_code', 'round_number', 'id_in_group', 'payoff']
+    for p in players:
+        participant = p.participant
+        session = p.session
+        yield [session.code, participant.code, p.round_number, p.id_in_group, p.payoff]
+        
+Once this function is defined, your custom data export will be available in the regular data export page.
+"""
+
+
+def custom_export(players):
+    # header row
+    yield ['session.code', 'left_red_marbles_majority_0', 'number_left_urn_triangle', 'number_left_urn_square', 'round_number', 'id_in_group',
+           'payoff', 'participant_payoff', 'consent', 'cognitive_load', 'similar_ingroup', 'observing_ingroup', 'type_assignment',
+           'group_assignment', 'urn_choice', 'color_drawn_marble', 'memorized_correctly', 'memorize_number']
+    for p in players:
+        participant = p.participant
+        session = p.session
+        subsession = p.subsession
+        participant.consent = p.consent
+        participant.cognitive_load = p.cognitive_load
+        participant.similar_ingroup = p.similar_ingroup
+        participant.observing_ingroup = p.observing_ingroup
+        participant.type_assignment = p.type_assignment
+        participant.group_assignment = p.group_assignment
+        participant.urn_choice = p.urn_choice
+        participant.color_drawn_marble = p.color_drawn_marble
+        participant.memorized_correctly = p.memorized_correctly
+        participant.memorize_number = p.memorize_number
+        yield [session.code, subsession.field_maybe_none('left_red_marbles_majority_0'),
+               subsession.field_maybe_none('number_left_urn_triangle'), subsession.field_maybe_none('number_left_urn_square'),
+               p.round_number, p.id_in_group, p.payoff,
+               participant.payoff, participant.consent, participant.cognitive_load, participant.similar_ingroup,
+               participant.observing_ingroup, participant.type_assignment, participant.group_assignment, participant.urn_choice,
+               participant.color_drawn_marble, participant.memorized_correctly, participant.memorize_number]
+
+
+########################################################################################################
+#                                 DYNAMIC URN CHOICE BUTTON                                            #
+########################################################################################################
+
+"""From https://otree.readthedocs.io/en/latest/forms.html: If you want choices to be determined dynamically 
+(e.g. different from player to player), then you can instead define one of the below functions.
+
+{field_name}_choices()
+
+Like setting choices=, this will set the choices for the form field (e.g. the dropdown menu or radio buttons).
+
+Example:
+
+class Player(BasePlayer):
+    fruit = models.StringField()
+
+def fruit_choices(player):
+    import random
+    choices = ['apple', 'kiwi', 'mango']
+    random.shuffle(choices)
+    return choices
+"""
+
+
+def urn_choice_choices(player: Player):
+    choices = [
+        [0, 'Left Urn'],
+        [1, 'Right Urn'],
+    ]
+    random.shuffle(choices)
+    return choices
+
+
+########################################################################################################
+#                                         QUIZ ERROR MESSAGES                                          #
+########################################################################################################
+def question1_error_message(player: Player, question1):
+    print('The focal player has answered the following to question 1:', question1)
+    if question1 != C.QUIZ_TYPE_B_ANSWER_1:
+        return (
+            "WRONG: The two urns contain always opposite compositions of marbles. One urn always contains 3 red "
+            "marbles and 1 blue marble. The other urn contains 1 red marble and 3 blue marbles. Please try to answer "
+            "the question again."
+        )
+
+
+# Question 2
+def question2_error_message(player: Player, question2):
+    print('The focal player has answered the following to question 2:', question2)
+    if player.participant.similar_ingroup == 0.1:
+        if question2 != C.QUIZ_ANSWER_2_TYPE_B_SIMILARITY_01:
+            if player.participant.group_assignment == C.GROUP_TRIANGLE:
+                return (
+                    "Wrong: There is a certain probability with which you get points for the same color as "
+                    "your own group, the triangle group. In particular, for you, the probability that you get "
+                    "points for your own group is 10% in every block. Thus, in a "
+                    "given block you don’t know for sure whether you earn points for the same color as type A "
+                    "participants of your own group, the triangle group, or the same color as type A "
+                    "participants of the other group, the square group. Please try to answer "
+                    "the question again."
+                )
+            else:
+                return (
+                    "Wrong: There is a certain probability with which you get points for the same color as "
+                    "your own group, the square group. In particular, for you, the probability that you get "
+                    "points for your own group is 10% in every block. Thus, in a "
+                    "given block you don’t know for sure whether you earn points for the same color as type A "
+                    "participants of your own group, the square group, or the same color as type A "
+                    "participants of the other group, the triangle group. Please try to answer "
+                    "the question again."
+                )
+    else:
+        if question2 != C.QUIZ_ANSWER_2_TYPE_B_SIMILARITY_09:
+            if player.participant.group_assignment == C.GROUP_TRIANGLE:
+                return (
+                    "Wrong: There is a certain probability with which you get points for the same color as "
+                    "your own group, the triangle group. In particular, for you, the probability that you get "
+                    "points for your own group is 90% in every block. Thus, in a "
+                    "given block you don’t know for sure whether you earn points for the same color as type A "
+                    "participants of your own group, the triangle group, or the same color as type A "
+                    "participants of the other group, the square group. Please try to answer "
+                    "the question again."
+                )
+            else:
+                return (
+                    "Wrong: There is a certain probability with which you get points for the same color as "
+                    "your own group, the square group. In particular, for you, the probability that you get "
+                    "points for your own group is 90% in every block. Thus, in a "
+                    "given block you don’t know for sure whether you earn points for the same color as type A "
+                    "participants of your own group, the square group, or the same color as type A "
+                    "participants of the other group, the triangle group. Please try to answer "
+                    "the question again."
+                )
+
+
+# Question 3
+def question3_error_message(player: Player, question3):
+    print('The focal player has answered the following to question 3:', question3)
+    if question3 != C.QUIZ_TYPE_B_ANSWER_3:
+        return (
+            "WRONG: Your group membership and your type have been determined at the beginning of the "
+            "instructions and will not change for the rest of the study. Please try to answer "
+            "the question again."
+        )
+
+
+# Question 4
+def question4_error_message(player: Player, question4):
+    print('The focal player has answered the following to question 4:', question4)
+    if question4 != C.QUIZ_TYPE_B_ANSWER_4:
+        return (
+            "WRONG: Type A participants of the two groups, triangle and square, receive points for opposite "
+            "colors. This also implies that, if in one given block the left urn is better for triangle type A "
+            "participants because it has more marbles of their winning color, then the right urn must be better "
+            "for square type A participants in this same block. Please try to answer "
+            "the question again."
+        )
+
+
+# Question 5
+def question5_error_message(player: Player, question5):
+    print('The focal player has answered the following to question 5:', question5)
+    if question5 != C.QUIZ_TYPE_B_ANSWER_5:
+        return (
+            "WRONG: Assume a new block starts and the urns have now been shuffled; Of course, no participants "
+            "knows for sure which urn contains which composition of marbles because no one can see the colors of "
+            "the marbles inside the urns. But let’s say in the current block there are now 3 red marbles and 1 "
+            "blue marble in the left urn and 1 red marble and 3 blue marbles in the right urn. Now, regardless of "
+            "the group and type, for every participant who chooses the left urn, the probability that a red "
+            "marble is drawn is 75% because 3 out of 4 marbles are red, and the probability that a blue marble is "
+            "drawn is 25% because 1 out 4 marbles are blue. Of course, the opposite would be true for the right "
+            "urn. Please try to answer the question again."
+        )
+
+
+# Question 6
+def question6_error_message(player: Player, question6):
+    print('The focal player has answered the following to question 6:', question6)
+    if question6 != C.QUIZ_TYPE_B_ANSWER_6:
+        return (
+            "WRONG: Type A participants can choose between the two urns for 4 rounds. Every time a "
+            "type A participant chooses an urn, a marble is drawn and they see the color of this marble. "
+            "Recall that the position of the urns stays the same in the 4 rounds of a given block. Thus, in "
+            "these 4 rounds each type A participant can try to find out which urn has more marbles of the color "
+            "they get points for. Please try to answer the question again."
+        )
+
+
+# Question 7
+def question7_error_message(player: Player, question7):
+    print('The focal player has answered the following to question 7:', question7)
+    if question7 != C.QUIZ_TYPE_B_ANSWER_7:
+        return (
+            "WRONG: You will see how many type A participants of either the triangle or square group have "
+            "chosen the left and right urn in their 4th, and thus last round of a given block. In some "
+            "blocks you will see the choices of triangle type A participants and in some blocks in you will "
+            "see the choices of square type A participants. Please try to answer the question again."
+        )
+
+
+# Question 8
+def question8_error_message(player: Player, question8):
+    print('The focal player has answered the following to question 8:', question8)
+    if question8 != C.QUIZ_TYPE_B_ANSWER_8:
+        return (
+            "WRONG: The two urns are shuffled at the start of every block and then they remain in this same "
+            "position until the end of a given block. Thus, type A participants can try to find out in which "
+            "urn there are more marbles of their winning color. Please try to answer "
+            "the question again."
+        )
+
+
+# Question 9
+def question9_error_message(player: Player, question9):
+    print('The focal player has answered the following to question 9:', question9)
+    if question9 != C.QUIZ_TYPE_B_ANSWER_9:
+        return (
+            "WRONG: In every block after you have chosen one of both urns, the computer will randomly draw a "
+            "marble 4 times and every time put it back before drawing the next marble. This guarantees that "
+            "you can earn the same amount of points as type A participants. Please try to answer "
+            "the question again."
+        )
+
+
+#############################################################################################################
+############################################################################################################
+############################################################################################################
+#                                                PAGES                                                     #
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+
+############################################################################################################
+#                                             INSTRUCTIONS                                                 #
+############################################################################################################
+
+
+class Consent(Page):
+    """This page contains introductory info and asks for consent"""
+
+    form_model = 'player'
+    form_fields = ['consent']
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class ConsentDisagree(Page):
+    """Display this page only if participant disagrees with the consent terms."""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.field_maybe_none('consent') == 0 and player.round_number == 1
+
+
+class ConsentAgree(Page):
+    """Display this page only if participant agrees with the consent terms."""
+    form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.field_maybe_none('consent') == 1 and player.round_number == 1
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.consent = player.consent
+
+
+class Instructions1(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    """Show group assignment animation"""
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(image_path='cognitive_load_exp/animations/group_assignment.mp4')
+
+
+class Instructions2(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class Instructions3(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    """Show type assignment animation"""
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(image_path='cognitive_load_exp/animations/type_assign.mp4')
+
+
+class Instructions4(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class Instructions5(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class Instructions6(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/type_group_assign/type_a_group_triangle.png',
+            image_path2='cognitive_load_exp/type_group_assign/type_b_group_triangle.png',
+            image_path3='cognitive_load_exp/type_group_assign/type_a_group_square.png',
+            image_path4='cognitive_load_exp/type_group_assign/type_b_group_square.png',
+        )
+
+
+class Instructions7(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/general_instructions/task_setup1.png',
+            image_path2='cognitive_load_exp/general_instructions/task_setup2.png',
+        )
+
+
+class Instructions8(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(image_path='cognitive_load_exp/animations/general_task_animation.mp4')
+
+
+class Instructions9TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions9TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions10TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A Triangle"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions10TypeBFirst(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(same_urns_left_red_majority='cognitive_load_exp/general_instructions/same_urns_left_red_majority.png',
+                    same_urns_right_red_majority='cognitive_load_exp/general_instructions/same_urns_right_red_majority.png')
+
+
+class Instructions10TypeBSecond(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(same_urns_left_red_majority='cognitive_load_exp/general_instructions/same_urns_left_red_majority.png',
+                    same_urns_right_red_majority='cognitive_load_exp/general_instructions/same_urns_right_red_majority.png')
+
+
+class Instructions11TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A Triangle"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+    """In the following I make use of the parameter 'winning_color_triangle' that I stored in settings.py under
+    SESSION_CONFIGS. The variable 'winning_color_triangle' is something we might want to vary across sessions and we
+    can edit this in SESSION_CONFIGS. The variable 'winning_color_triangle' was then stored under
+    'def creating_session(subsession: Subsession):' on the session level and thus, we can always access the variable 
+    value by typing 'session.winning_color_triangle' or on templates with either
+    {{ session.config.winning_color_triangle }} or; {{ session.vars.winning_color_triangle }}"""
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/winning_color/winning_color_'
+            + player.session.winning_color_triangle
+            + '.png',
+            image_path2='cognitive_load_exp/winning_color/winning_color_'
+            + player.session.winning_color_square
+            + '.png',
+        )
+
+
+class Instructions11TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(image_path='cognitive_load_exp/general_instructions/same_urns_greyed_out.png')
+
+
+class Instructions12TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions12TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions13(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(image_path='cognitive_load_exp/type_b_instructions/block_sequence.jpg')
+
+
+class Instructions14(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class Instructions15(Page):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    """Note, I vary info on this page depending on the treatment of the given subject but I can do this on the template
+    itself, rather than specifying a separate page."""
+
+
+class Instructions16TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions16TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions17TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions17TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions18TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions18TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions19TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.field_maybe_none('urn_choice')
+
+
+class Instructions19TypeB(Page):
+    form_model = 'player'
+    """Only show page to Subjects with treatment cognitive load = yes:"""
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions20TypeA(Page):
+    form_model = 'player'
+    form_fields = ['urn_choice']
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_block_type_a/urn_choice.png',
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.urn_choice
+
+
+class Instructions20TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class DetermineColorDrawnmarbleTypeAPracticeBlock(WaitPage):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+    form_model = 'player'
+    title_text = "Please wait"
+    body_text = (
+        "We will soon show you the color of the drawn marble but we first wait for every type A participant "
+        "to choose an urn."
+    )
+    after_all_players_arrive = 'determine_color_drawn_marble_practice_block'
+
+
+class Instructions21TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            wc_red_left_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_left_red_100.png',
+            wc_red_left_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_left_blue_0.png',
+            wc_red_right_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_right_red_100.png',
+            wc_red_right_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_right_blue_0.png',
+            wc_blue_left_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_left_red_0.png',
+            wc_blue_left_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_left_blue_100.png',
+            wc_blue_right_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_right_red_0.png',
+            wc_blue_right_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_right_blue_100.png',
+        )
+
+
+class Instructions21TypeB(Page):
+    form_model = 'player'
+    """Only show page to Subjects with treatment cognitive load = yes:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+    """Below I define a variable, namely the multi-digit number, for the template and I save it in a player field with variable name 
+    'memorize_number'), so that I can later refer to this number and check whether it's correct when players enter the number. 
+    Note: I don't store it under participant variable, because participant variables would be constant across subsessions:"""
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        import random
+        participant = player.participant
+        length_multi_digit = player.session.length_multi_digit
+        print('length_multi_digit:', length_multi_digit)
+        multi_digit_number = [None] * length_multi_digit
+        for i in range(0, length_multi_digit):
+            multi_digit_number[i] = random.randrange(0, 9, 1)
+        """First define a variable that shows the four list elements as separate characters/string-elements/letters 
+        with spaces between the separate letters:"""
+        show_multi_digit_number = ' '.join([str(elem) for elem in multi_digit_number])
+        """Then do same but without spaces so that we can then compare this number to the number the subject will insert
+        on template of the page 'Instructions32TypeB':"""
+        player.memorize_number = ''.join([str(elem) for elem in multi_digit_number])
+        participant.memorize_number = player.memorize_number
+        print('player.memorize_number', player.memorize_number)
+        print('participant.memorize_number', participant.memorize_number)
+        """Take variable above with spaces (show_multi_digit_number) and return in dictionary:"""
+        return dict(show_multi_digit_number=show_multi_digit_number)
+
+
+class Instructions22TypeA(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number == 1
+
+
+class Instructions22TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions23TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/type_b_instructions/socinfo_example_triangle.png',
+            image_path2='cognitive_load_exp/type_b_instructions/socinfo_example_square.png',
+        )
+
+
+class Instructions24TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions25EarningTypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+
+class Instructions25Earning2TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+
+class Instructions25TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions26TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions27TypeB(Page):
+    form_model = 'player'
+
+    def get_timeout_seconds(player):
+        session = player.session
+
+        return session.config['timeout_seconds_multi_digit']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        import random
+        participant = player.participant
+        length_multi_digit = player.session.length_multi_digit
+        print('length_multi_digit:', length_multi_digit)
+        multi_digit_number = [None] * length_multi_digit
+        for i in range(0, length_multi_digit):
+            multi_digit_number[i] = random.randrange(0, 9, 1)
+        """First define a variable that shows the four list elements as separate characters/string-elements/letters 
+        with spaces between the separate letters:"""
+        show_multi_digit_number = ' '.join([str(elem) for elem in multi_digit_number])
+        """Then do same but without spaces so that we can then compare this number to the number the subject will insert
+        on template of the page 'Instructions32TypeB':"""
+        player.memorize_number = ''.join([str(elem) for elem in multi_digit_number])
+        participant.memorize_number = player.memorize_number
+        print('player.memorize_number', player.memorize_number)
+        print('participant.memorize_number', participant.memorize_number)
+        """Take variable above with spaces (show_multi_digit_number) and return in dictionary:"""
+        return dict(show_multi_digit_number=show_multi_digit_number)
+
+
+class Instructions28TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    def get_timeout_seconds(player):
+        session = player.session
+        return session.config['timeout_seconds_social_info']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/socinfo_example_block_triangle.png',
+            image_path2='cognitive_load_exp/example_blocks_type_b/socinfo_example_block_square.png',
+        )
+
+
+class Instructions29TypeB(Page):
+    form_model = 'player'
+    form_fields = ['urn_choice']
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/urn_choice.png',
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.field_maybe_none('urn_choice')
+        player.urn_choice = None
+
+
+class Instructions30TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/left_urn_chosen_soc.png',
+            image_path2='cognitive_load_exp/example_blocks_type_b/right_urn_chosen_soc.png',
+        )
+
+
+class Instructions31TypeB(Page):
+    form_model = 'player'
+    form_fields = ['insert_memorize_number']
+    """Only show page to Subjects with treatment cognitive load = yes:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+    """Register whether a given player inserted the correct number they had to memorize and store in boolean variable
+    'memorized_correctly' defined in models.py under class Player:"""
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        """Register whether a player was able to correctly remember the multi-digit number in player variable
+        'memorized_correctly' (Correct=1, Wrong=0):"""
+        participant = player.participant
+        participant.memorize_number = player.field_maybe_none('memorize_number')
+        print('memorize_number is:', player.memorize_number)
+        print('insert_memorize_number is:', player.insert_memorize_number)
+        if player.memorize_number == player.insert_memorize_number:
+            player.memorized_correctly = 1
+            print('the focal player memorized the number correctly')
+        else:
+            player.memorized_correctly = 0
+            print('the focal player did not memorize the number correctly')
+        """Before next page make the player variable 'insert_memorize_number' blank again to avoid that a default number
+        is already inserted when a player has to insert a new number on one of the following pages again:"""
+        player.insert_memorize_number = ""
+
+
+class Instructions32TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class Instructions33TypeB(Page):
+    form_model = 'player'
+    """Only show page to Subjects with treatment cognitive load = yes:"""
+
+    def get_timeout_seconds(player):
+        session = player.session
+
+        return session.config['timeout_seconds_multi_digit']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        import random
+        participant = player.participant
+        length_multi_digit = player.session.length_multi_digit
+        print('length_multi_digit:', length_multi_digit)
+        multi_digit_number = [None] * length_multi_digit
+        for i in range(0, length_multi_digit):
+            multi_digit_number[i] = random.randrange(0, 9, 1)
+        """First define a variable that shows the four list elements as separate characters/string-elements/letters 
+        with spaces between the separate letters:"""
+        show_multi_digit_number = ' '.join([str(elem) for elem in multi_digit_number])
+        """Then do same but without spaces so that we can then compare this number to the number the subject will insert
+        on template of the page 'Instructions32TypeB':"""
+        player.memorize_number = ''.join([str(elem) for elem in multi_digit_number])
+        participant.memorize_number = player.memorize_number
+        print('player.memorize_number', player.memorize_number)
+        print('participant.memorize_number', participant.memorize_number)
+        """Take variable above with spaces (show_multi_digit_number) and return in dictionary:"""
+        return dict(show_multi_digit_number=show_multi_digit_number)
+
+
+class Instructions34TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    def get_timeout_seconds(player):
+        session = player.session
+
+        return session.config['timeout_seconds_social_info']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/socinfo_example_block2_triangle.png',
+            image_path2='cognitive_load_exp/example_blocks_type_b/socinfo_example_block2_square.png',
+        )
+
+
+class Instructions35TypeB(Page):
+    form_model = 'player'
+    form_fields = ['urn_choice']
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/urn_choice.png',
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.field_maybe_none('urn_choice')
+        player.urn_choice = None
+
+
+class Instructions36TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_blocks_type_b/left_urn_chosen_soc.png',
+            image_path2='cognitive_load_exp/example_blocks_type_b/right_urn_chosen_soc.png',
+        )
+
+
+class Instructions37TypeB(Page):
+    form_model = 'player'
+    form_fields = ['insert_memorize_number']
+    """Only show page to Subjects with treatment cognitive load = yes:"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return participant.type_assignment == C.TYPE_B and participant.cognitive_load == 1 and player.round_number == 1
+
+    """Register whether a given player inserted the correct number they had to memorize and store in boolean variable
+    'memorized_correctly' defined in models.py under class Player:"""
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        """Register whether a player was able to correctly remember the multi-digit number in player variable
+        'memorized_correctly' (Correct=1, Wrong=0):"""
+        participant = player.participant
+        participant.memorize_number = player.field_maybe_none('memorize_number')
+        print('memorize_number is:', player.memorize_number)
+        print('insert_memorize_number is:', player.insert_memorize_number)
+        if player.memorize_number == player.insert_memorize_number:
+            player.memorized_correctly = 1
+            print('the focal player memorized the number correctly')
+        else:
+            player.memorized_correctly = 0
+            print('the focal player did not memorize the number correctly')
+        """Before next page make the player variable 'insert_memorize_number' blank again to avoid that a default number
+        is already inserted when a player has to insert a new number on one of the following pages again:"""
+        player.insert_memorize_number = ""
+
+
+class Instructions38TypeB(Page):
+    form_model = 'player'
+    """Only show page to Type B"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+
+class QuizQuestion1TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question1']
+
+
+class QuizQuestion2TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question2']
+
+
+class QuizQuestion3TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question3']
+
+
+class QuizQuestion4TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question4']
+
+
+class QuizQuestion5TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question5']
+
+
+class QuizQuestion6TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question6']
+
+
+class QuizQuestion7TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question7']
+
+
+class QuizQuestion8TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question8']
+
+
+class QuizQuestion9TypeB(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['question9']
+
+
+class InstructionsFinal(WaitPage):
+    form_model = 'player'
+    """Specify to only show page in the first round:"""
+    wait_for_all_groups = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+############################################################################################################
+#                                              EXPERIMENT                                                  #
+############################################################################################################
+
+
+class Task0(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        """Remove data that was registered during instructions because instructions was round 1 and we continue with round 1 in actual 
+        experiment where we want to have a clean sheet of choice data and only keep treatment assignments, etc.:"""
+        player.urn_choice = None
+        participant.urn_choice = player.field_maybe_none('urn_choice')
+        player.memorized_correctly = None
+        participant.memorized_correctly = player.field_maybe_none('memorized_correctly')
+        player.memorize_number = None
+
+
+class TaskTypeA1(Page):
+    form_model = 'player'
+    form_fields = ['urn_choice']
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number >= 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_block_type_a/urn_choice.png',
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.urn_choice
+
+
+class DetermineColorDrawnmarbleTypeA(WaitPage):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number >= 1
+
+    form_model = 'player'
+    title_text = "Please wait"
+    body_text = (
+        "We will soon show you the color of the drawn marble but we first wait for every type A participant "
+        "to choose an urn."
+    )
+
+    after_all_players_arrive = 'color_and_payoff_type_a'
+
+
+class TaskTypeA2(Page):
+    form_model = 'player'
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and player.round_number >= 1
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            wc_red_left_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_left_red_100.png',
+            wc_red_left_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_left_blue_0.png',
+            wc_red_right_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_right_red_100.png',
+            wc_red_right_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_red/urn_choice_right_blue_0.png',
+            wc_blue_left_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_left_red_0.png',
+            wc_blue_left_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_left_blue_100.png',
+            wc_blue_right_urn_red_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_right_red_0.png',
+            wc_blue_right_urn_blue_marble='cognitive_load_exp/example_block_type_a/wc_blue/urn_choice_right_blue_100.png',
+        )
+
+
+class WaitForTypeA(WaitPage):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B
+
+    wait_for_all_groups = True
+
+    form_model = 'player'
+    title_text = "Please wait"
+    body_text = (
+        "Please wait, until all type A participants have chosen between the two urns for 4 rounds."
+    )
+
+    after_all_players_arrive = 'choice_distribution'
+
+
+class TaskTypeBCogLoad(Page):
+    form_model = 'player'
+
+    def get_timeout_seconds(player):
+        session = player.session
+        return session.config['timeout_seconds_multi_digit']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and player.participant.cognitive_load == 1 and (player.round_number % 4 == 0)
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        import random
+        participant = player.participant
+        length_multi_digit = player.session.length_multi_digit
+        print('length_multi_digit:', length_multi_digit)
+        multi_digit_number = [None] * length_multi_digit
+        for i in range(0, length_multi_digit):
+            multi_digit_number[i] = random.randrange(0, 9, 1)
+        """First define a variable that shows the four list elements as separate characters/string-elements/letters 
+        with spaces between the separate letters:"""
+        show_multi_digit_number = ' '.join([str(elem) for elem in multi_digit_number])
+        """Then do same but without spaces so that we can then compare this number to the number the subject will insert
+        on template of the page 'Instructions32TypeB':"""
+        player.memorize_number = ''.join([str(elem) for elem in multi_digit_number])
+        participant.memorize_number = player.memorize_number
+        print('player.memorize_number', player.memorize_number)
+        print('participant.memorize_number', participant.memorize_number)
+        """Take variable above with spaces (show_multi_digit_number) and return in dictionary:"""
+        return dict(show_multi_digit_number=show_multi_digit_number)
+
+
+class TaskTypeB1(Page):
+    form_model = 'player'
+
+    def get_timeout_seconds(player):
+        session = player.session
+        return session.config['timeout_seconds_social_info']
+
+    """Type B participants only  choose after Type A participants have chosen for 4 rounds. Thus, Type B will only see page every fourth 
+    round and I use the modulo operator % to do this:"""
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and (player.round_number % 4 == 0)
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        subsession = player.subsession
+        number_left_urn_triangle = subsession.number_left_urn_triangle
+        number_left_urn_square = subsession.number_left_urn_square
+        block_number = round(subsession.round_number / 4)
+        return dict(
+            number_left_urn_triangle=number_left_urn_triangle,
+            number_left_urn_square=number_left_urn_square,
+            block_number=block_number,
+            triangle_left1_right4='cognitive_load_exp/social_info/triangle/triangle_left1_right4.png',
+            triangle_left2_right3='cognitive_load_exp/social_info/triangle/triangle_left2_right3.png',
+            triangle_left3_right2='cognitive_load_exp/social_info/triangle/triangle_left3_right2.png',
+            triangle_left4_right1='cognitive_load_exp/social_info/triangle/triangle_left4_right1.png',
+            triangle_left5='cognitive_load_exp/social_info/triangle/triangle_left5.png',
+            triangle_right5='cognitive_load_exp/social_info/triangle/triangle_right5.png',
+            square_left1_right4='cognitive_load_exp/social_info/square/square_left1_right4.png',
+            square_left2_right3='cognitive_load_exp/social_info/square/square_left2_right3.png',
+            square_left3_right2='cognitive_load_exp/social_info/square/square_left3_right2.png',
+            square_left4_right1='cognitive_load_exp/social_info/square/square_left4_right1.png',
+            square_left5='cognitive_load_exp/social_info/square/square_left5.png',
+            square_right5='cognitive_load_exp/social_info/square/square_right5.png',
+        )
+
+
+class TaskTypeB2(Page):
+    form_model = 'player'
+    form_fields = ['urn_choice']
+    """Only show page to Type A"""
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_B and (player.round_number % 4 == 0)
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            image_path='cognitive_load_exp/example_block_type_a/urn_choice.png',
+        )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        participant.urn_choice = player.urn_choice
+
+
+class WaitForTypeB(WaitPage):
+    """Type A participants wait with proceeding to 5th period until all type B participants have chosen:"""
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.participant.type_assignment == C.TYPE_A and (player.round_number % 4 == 0)
+
+    wait_for_all_groups = True
+
+    form_model = 'player'
+    title_text = "Please wait"
+    body_text = (
+        "Please wait, until all type B participants have finished their decision tasks."
+    )
+
+
+class Questionnaire1(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q1']
+
+
+class Questionnaire2(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q2']
+
+
+class Questionnaire3(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q3']
+
+
+class Questionnaire4(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q4']
+
+
+class Questionnaire5(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q5']
+
+
+class Questionnaire6(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q6']
+
+
+class Questionnaire7(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q7']
+
+
+class Questionnaire8(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    # This block determines which comp check questions to ask the user.
+    form_model = 'player'
+    form_fields = ['q8']
+
+
+page_sequence = [Instructions25EarningTypeB,
+                 Instructions25Earning2TypeB,
+                 Instructions25TypeB,
+                 Questionnaire1,
+                 Questionnaire2,
+                 Questionnaire3,
+                 Questionnaire4,
+                 Questionnaire5,
+                 Questionnaire6,
+                 Questionnaire7,
+                 Questionnaire8,
+                 InstructionsFinal,
+                 Task0,
+                 TaskTypeA1,
+                 DetermineColorDrawnmarbleTypeA,
+                 TaskTypeA2,
+                 WaitForTypeA,
+                 TaskTypeBCogLoad,
+                 TaskTypeB1,
+                 TaskTypeB2,
+                 WaitForTypeB
+                 ]
+
+
+""" Pace Lab Testing length of multi-digit number and amount of seconds to memorize it 
+page_sequence = [Instructions27TypeB,
+                 Instructions28TypeB,
+                 Instructions29TypeB,
+                 Instructions30TypeB,
+                 Instructions31TypeB,
+                 Instructions32TypeB,
+                 Instructions33TypeB,
+                 Instructions34TypeB,
+                 Instructions35TypeB,
+                 Instructions36TypeB,
+                 Instructions37TypeB,
+                 Instructions38TypeB,
+                 ]
+"""
+
+"""
+page_sequence = [Consent,
+                 ConsentDisagree,
+                 ConsentAgree,
+                 Instructions1,
+                 Instructions2,
+                 Instructions3,
+                 Instructions4,
+                 Instructions5,
+                 Instructions6,
+                 Instructions7,
+                 Instructions8,
+                 Instructions9TypeA,
+                 Instructions9TypeB,
+                 Instructions10TypeA,
+                 Instructions10TypeBFirst,
+                 Instructions10TypeBSecond,
+                 Instructions11TypeA,
+                 Instructions11TypeB,
+                 Instructions12TypeA,
+                 Instructions12TypeB,
+                 Instructions13,
+                 Instructions14,
+                 Instructions15,
+                 Instructions16TypeA,
+                 Instructions16TypeB,
+                 Instructions17TypeA,
+                 Instructions17TypeB,
+                 Instructions18TypeA,
+                 Instructions18TypeB,
+                 Instructions19TypeA,
+                 Instructions19TypeB,
+                 Instructions20TypeA,
+                 Instructions20TypeB,
+                 DetermineColorDrawnmarbleTypeAPracticeBlock,
+                 Instructions21TypeA,
+                 Instructions21TypeB,
+                 Instructions22TypeB,
+                 Instructions22TypeA,
+                 Instructions23TypeB,
+                 Instructions24TypeB,
+                 Instructions25TypeB,
+                 Instructions26TypeB,
+                 Instructions27TypeB,
+                 Instructions28TypeB,
+                 Instructions29TypeB,
+                 Instructions30TypeB,
+                 Instructions31TypeB,
+                 Instructions32TypeB,
+                 Instructions33TypeB,
+                 Instructions34TypeB,
+                 Instructions35TypeB,
+                 Instructions36TypeB,
+                 Instructions37TypeB,
+                 Instructions38TypeB,
+                 QuizQuestion1TypeB,
+                 QuizQuestion2TypeB,
+                 QuizQuestion3TypeB,
+                 QuizQuestion4TypeB,
+                 QuizQuestion5TypeB,
+                 QuizQuestion6TypeB,
+                 QuizQuestion7TypeB,
+                 QuizQuestion8TypeB,
+                 QuizQuestion9TypeB,
+                 InstructionsFinal,
+                 Task0,
+                 TaskTypeA1,
+                 DetermineColorDrawnmarbleTypeA,
+                 TaskTypeA2]
+"""

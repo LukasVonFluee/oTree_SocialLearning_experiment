@@ -1,0 +1,39 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Setup for Decision Task</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                <li> During the experiment, participants will <b>choose between
+                    the two urns</b> multiple times after they have been shuffled. </li>
+                <li> Every time a participant chooses an urn, a marble is <b>randomly</b> drawn, and each time a marble is drawn, it is returned to the urn. </li>
+                <li> <b>Depending on the colour</b> of the drawn marble, participants can <b>earn points</b>. </li>
+                <li> We will explain more about who can earn points for which colour later. </li>
+            </ul>
+
+        </div>
+
+        </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

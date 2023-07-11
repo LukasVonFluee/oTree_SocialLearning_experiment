@@ -1,0 +1,50 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.four {
+            border: 3px solid #3368FF;
+        }
+
+    </style>
+
+    <h1>Summary</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> Recall: You earn <b>100 points</b> for
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+                        <span style="color:{{subsession.session.winning_color_triangle}}">
+                            {{subsession.session.winning_color_triangle}} </span>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %}
+                        <span style="color:{{subsession.session.winning_color_square}}">
+                            {{subsession.session.winning_color_square}} </span>
+                    {% endif %} marbles and <b>0 points</b> for
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+                        <span style="color:{{subsession.session.winning_color_square}}">
+                            {{subsession.session.winning_color_square}} </span>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %}
+                        <span style="color:{{subsession.session.winning_color_triangle}}">
+                            {{subsession.session.winning_color_triangle}} </span>
+                    {% endif %} marbles. </li>
+                <li> At the start of every block, the two <b>urns are shuffled anew</b> and <b>then remain in their same position until the end of a given block</b>.</li>
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

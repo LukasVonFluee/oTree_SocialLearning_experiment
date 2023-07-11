@@ -1,0 +1,62 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style type="text/css">
+
+        .form_label {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 4</h1>
+
+    {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            <div class="form_label"> Do you <span class="bold">always</span> get points for the <span class="bold">same colour</span> of marbles as type A participants <br> of <span class="bold">your own group, the triangle &#9650; group</span>? </div>
+
+        </div>
+
+    </div>
+
+    {% elif participant.group_assignment == C.GROUP_SQUARE %}
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            <div class="form_label"> Do you <span class="bold">always</span> get points for the <span class="bold">same colour</span> of marbles as type A participants <br> of <span class="bold">your own group, the square &#9632; group</span>? </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            {% formfield player.question4_type_b %}
+
+        </div>
+
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+
+

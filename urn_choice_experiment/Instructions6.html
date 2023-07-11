@@ -1,0 +1,59 @@
+{{ block content }}
+
+    <style>
+
+    p.four {
+    border-style: solid;
+    border-color: blue;
+    }
+
+    .center_img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #3368FF;
+    }
+
+    </style>
+
+    <h1>Your Group and Type Assignment</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+                <p style="font-size:32px" class="four">
+                    You have been randomly assigned to the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} <b>triangle</b> &#9650; <b>group</b>.
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %}  <b>square</b> &#9632; <b>group</b>.
+                    {% endif %}
+                </p>
+        </div>
+    </div>
+
+        <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            <p style="font-size:32px" class="four">
+                And you have been randomly assigned to do type {% if participant.type_assignment == C.TYPE_A %}
+                <b>{{ C.TYPE_A_NAME }}</b> tasks. {% else %} <b>{{ C.TYPE_B_NAME }}</b> tasks. {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if participant.group_assignment == C.GROUP_TRIANGLE and participant.type_assignment == C.TYPE_A %}
+        <p class="center_img"> <img src="{% static image_path %}" alt="Type A and group triangle assignment." width="90%"/> </p>
+    {% elif participant.group_assignment == C.GROUP_TRIANGLE and participant.type_assignment == C.TYPE_B %}
+        <p class="center_img"> <img src="{% static image_path2 %}" alt="Type B and group triangle assignment." width="90%"/> </p>
+    {% elif participant.group_assignment == C.GROUP_SQUARE and participant.type_assignment == C.TYPE_A %}
+        <p class="center_img"> <img src="{% static image_path3 %}" alt="Type A and group square assignment." width="90%"/> </p>
+    {% elif participant.group_assignment == C.GROUP_SQUARE and participant.type_assignment == C.TYPE_B %}
+        <p class="center_img"> <img src="{% static image_path4 %}" alt="Type B and group square assignment." width="90%"/> </p>
+    {% endif %}
+
+    {{ next_button }}
+
+{{ endblock }}
+
+

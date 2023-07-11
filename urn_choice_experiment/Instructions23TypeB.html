@@ -1,0 +1,75 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.four {
+            border: 3px solid #3368FF;
+        }
+
+    </style>
+
+<h1>Summary</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> At the start of every block, the two <b>urns are shuffled anew</b> and <b>then remain in their same position until the end of a given block</b>.</li>
+
+                {% if participant.cognitive_load == 1 %}
+
+                <li> At the beginning of every block, you have to <b>memorize a new {{ player.session.length_multi_digit }}-digit number</b>. </li>
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> At the beginning of every block, you will be shown a new {{ player.session.length_multi_digit }}-digit number.
+                    You don't have to memorize it because it will be shown to you again later when you will be asked to enter it. </li>
+
+                {% endif %}
+
+                <li> You will then <b>see the urn choices</b> of type <b>A</b> participants of the <b>last of the 4 rounds</b>
+                    of a block. </li>
+                <li> In some blocks you will see the urn choices of type <b>A</b> participants of
+                    <b>your own group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} <b>triangle</b>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} <b>square</b>
+                    {% endif %} group, and in some blocks you will see the choices of <b>the other group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} <b>square</b>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} <b>triangle</b>
+                    {% endif %} group. </li>
+                <li> At the same time, in a given block it can either be very likely <b>(90%)</b> that you <b>share the winning color with your own group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} <b>triangle</b>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} <b>square</b>
+                    {% endif %} group, or it can be very unlikely <b>(10%)</b>.</li>
+                <li> Importantly, type <b>A</b> participants of the two groups,
+                    <b>triangle and square</b>, earn points for <b>the opposite colour</b>. This means that one of both urns
+                    will always be optimal for one group while the opposite urn is optimal for the other group in a given block. </li>
+
+                {% if participant.cognitive_load == 1 %}
+
+                <li> Finally, you have to recall the number that you had to memorize and enter it. </li>
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> Finally, you will be shown the number again, and you have to correctly enter it. </li>
+
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

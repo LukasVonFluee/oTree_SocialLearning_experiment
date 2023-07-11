@@ -1,0 +1,43 @@
+{{ block content }}
+
+<style xmlns="http://www.w3.org/1999/html">
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+<h1>How you earn points</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                {% if participant.cognitive_load == 1 %}
+
+                <li> In case the computer determines that you get points for memorizing the multi-digit numbers, here is how you would earn points: </li>
+                <li> If you have <b>memorized</b> the number <b>correctly</b> in a block, 4 marbles will be randomly drawn from the urn with <b>3 out of 4</b> marbles with your winning colour.</li>
+                <li> If you have <b>not memorized</b> the number correctly in a given block, 4 marbles will be randomly drawn from the urn with only <b>1 out 4</b> marbles with your winning colour.</li>
+                <li> Just like in the urn choice task, we will not tell you how well you did in the memorization task during the experiment. </li>
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> In case the computer determines that you get points for correctly entering the multi-digit numbers, here is how you would earn points: </li>
+                <li> If you have entered the number correctly in a block, 4 marbles will be randomly drawn from the urn with <b>3 out of 4</b> marbles with your winning colour.</li>
+                <li> If you have not entered the number correctly in a given block, 4 marbles will be randomly drawn from the urn with only <b>1 out 4</b> marbles with your winning colour.</li>
+
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

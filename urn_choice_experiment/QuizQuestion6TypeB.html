@@ -1,0 +1,44 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+    <style>
+
+        .form_label {
+            font-size: 18px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .italics {
+            font-style: italic;
+        }
+    </style>
+
+    <h1>Quiz Question 6</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    <div class="form_label"> If you would only focus on either the <b>urn choice</b> task or <b>memorizing</b> the multi digit numbers, what
+        is the worst possible outcome in terms of the amount of points you can earn? Please enter a number below without adding any words to it:</div>
+
+    </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+    {% formfield player.question6_type_b %}
+
+    </div>
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
+
+

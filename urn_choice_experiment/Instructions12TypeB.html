@@ -1,0 +1,36 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Structure of Study</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                <li> We have shown you now the basic decision task but participants actually have to choose between the
+                    two urns repeatedly during this study. </li>
+                <li> In total, there are <b>20</b> so-called `<b>blocks</b>'.</li>
+                <li> In each block, both type <b>A</b> and type <b>B</b> participants receive information and
+                    complete decision tasks. </li>
+                <li> In the following, we will explain to you what happens during <b>1 given block</b>. </li>
+
+            </ul>
+
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

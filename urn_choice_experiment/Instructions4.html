@@ -1,0 +1,36 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Group and Type</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> In both groups, the triangle &#9650; and the square &#9632; group, there will be <b>5 type A participants</b>. </li>
+                <li> The <b>rest of the participants</b> will conduct the tasks for <b>type B</b>, and both groups, the triangle &#9650; and the
+                    square &#9632; group, will have an equal number of type B participants. </li>
+                <li> You will now be randomly assigned to either the <b>triangle</b> &#9650; group or the <b>square</b> &#9632; group. </li>
+                <li> And you will learn whether you will be completing type <b>A</b> tasks or type <b>B</b> tasks. </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}
+

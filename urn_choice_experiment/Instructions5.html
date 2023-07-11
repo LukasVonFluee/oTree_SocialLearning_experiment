@@ -1,0 +1,32 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Your Group and Type Assignment</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+            <div class="ul_properties">
+                <ul style="font-size:20px">
+                    <li> You will now be randomly assigned to either the <b>triangle</b> &#9650; group or the <b>square</b> &#9632; group. </li>
+                    <li> In addition, you will also be randomly assigned to be either a type <b>A</b> or type <b>B</b> participant. </li>
+                    <li> Please click on "Next", to find out your group and your type assignment. </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{{ next_button }}
+
+{{ endblock }}
+

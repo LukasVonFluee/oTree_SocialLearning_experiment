@@ -1,0 +1,50 @@
+{{ block content }}
+
+    <style>
+
+        p.important_info {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    </style>
+
+<h1>Your Decision Task: 2. Step</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                <li> In every block, after you have been shown the multi digit number, you will see a new picture that gives you useful information for your choice between the two urns.</li>
+                <li> You will see information telling you that you are either very likely or very unlikely to
+                    <b>share the winning color with your own group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} <b>triangle</b>
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} <b>square</b>
+                    {% endif %} group, in a given block.</li>
+                <li> This information will be helpful to you because you will simultaneously see <b>how many Type A</b> participants have
+                    chosen the left or right urn in the final round of a block after they had four rounds to find out which urn contains
+                    more marbles of their winning color. </li>
+                <li> More precisely, you will either see the choices of <b>your own group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} triangle
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} square
+                    {% endif %} group, <b>or of the other group</b>, the
+                    {% if participant.group_assignment == C.GROUP_TRIANGLE %} square
+                    {% elif participant.group_assignment == C.GROUP_SQUARE %} triangle
+                    {% endif %} group, in a given block.</li>
+                <li> How likely you are to share the winning color with your own group, and whether you observe your own group's choices or
+                    the other group's, <b>can change between blocks</b>, so pay close attention to the information you are shown in every block. </li>
+                <li> In the following, we show you four examples. </li>
+
+            </ul>
+
+        </div>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

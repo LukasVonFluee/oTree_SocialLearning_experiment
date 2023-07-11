@@ -1,0 +1,30 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        img {
+            border: 1px solid #3368FF;
+        }
+
+        .center_img {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+
+    <h1>Setup for Decision Task</h1>
+
+    <p class="center_img"> <img src="{% static image_path %}" alt="Image showing the two different sets of marbles." width="100%"/> </p>
+
+{{ next_button }}
+
+{{ endblock }}

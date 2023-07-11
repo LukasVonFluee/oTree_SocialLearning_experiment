@@ -1,0 +1,45 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+<h1>Your earnings:</h1>
+
+<br>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            <p>During the experiment you earned <b>{{ player.participant.payoff }}</b> which is equal to <b>CHF {{money}}</b>.</p>
+
+        </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+            <p>Together with the <b>participation fee of {{session.participation_fee}}</b> your total earnings are:</p>
+            <h1><b>CHF {{final_earnings}}</b>.</h1>
+        </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+            <h1> You can now get your earnings but please don't forget to bring your numbered card with you to receive
+                your payments and remain quiet so as not to disturb the other participants.</h1>
+        </div>
+    </div>
+
+
+{{ endblock }}
+

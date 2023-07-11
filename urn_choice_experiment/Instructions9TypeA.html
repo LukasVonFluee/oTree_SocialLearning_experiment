@@ -1,0 +1,32 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Instructions - Decision Task</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> Not every participant will face exactly the same decision tasks. </li>
+                <li> In the following you will receive specifically the information that you, as a
+                {% if participant.group_assignment == C.GROUP_TRIANGLE and participant.type_assignment == C.TYPE_A %} <b>triangle &#9650; type A</b>
+                {% elif participant.group_assignment == C.GROUP_SQUARE and participant.type_assignment == C.TYPE_A %} <b>square &#9632; type A</b>
+                {% endif %} participant, will need to complete your decision tasks.</li>
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

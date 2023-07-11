@@ -1,0 +1,34 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+<h1>Your Decision Task: 3. Step</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> After seeing this information, you will choose between the urns yourself.</li>
+                <li> You will only choose between the urns <b>once per block</b>.</li>
+                <li> However, <b>4 marbles will then be drawn</b> randomly from this chosen urn and every time a marble is drawn,
+                    it will be put back into the urn before the next marble is drawn.</li>
+                <li> Thus, <b>you can earn the same amount of points as Type A participants</b> per block.</li>
+                <li> In contrast to Type A participants, <b>you will not see the colour of the marbles that are drawn</b> and thus,
+                    you will only know by the end of the experiment how many points you’ve earned.</li>
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

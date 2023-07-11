@@ -1,0 +1,47 @@
+{{ block content }}
+
+    <style>
+
+        p.important_info {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    </style>
+
+    <h1>Information: Example 2</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                <li> Or it is very likely (90%) that you <b>share the winning color with your own group</b> in a given block. </li>
+
+                <li> But you see how many participants of <b>the other group</b> have chosen the left and right urn. </li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        {% if participant.group_assignment == C.GROUP_TRIANGLE %}
+
+            <img src="{% static triangle_out_09 %}" alt="Similarity high triangle outgroup." width="100%"/>
+
+        {% elif participant.group_assignment == C.GROUP_SQUARE %}
+
+            <img src="{% static square_out_09 %}" alt="Similarity high square outgroup." width="100%"/>
+
+        {% endif %}
+
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

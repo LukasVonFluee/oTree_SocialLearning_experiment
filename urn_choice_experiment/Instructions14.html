@@ -1,0 +1,36 @@
+{{ block content }}
+
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Sequence during 1 Block:</h1>
+
+    <h3>1. Urns are shuffled.</h3>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> At the start of every block, the two urns are shuffled anew.</li>
+                <li> Immediately after the urns have been shuffled, <b>no one knows</b> which set of marbles is in the left, and which is in the right urn for sure because the colours are hidden.</li>
+                <li> Until the end of the block the urns then <b>remain in the same position</b>. </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

@@ -1,0 +1,57 @@
+{{ block content }}
+
+<style>
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid blue;
+    height: 100px;
+ }
+
+.center_img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid blue;
+ }
+
+</style>
+
+<h1>Practice Block</h1>
+
+<div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body" oncopy="return false" onpaste="return false" oncut="return false">
+
+        {% if participant.cognitive_load == 1 %}
+
+        <p style="font-size:24px"> Please recall the {{ player.session.length_multi_digit }}-digit number you had to memorize and insert it below: </p>
+
+        <div class="center">
+
+            <p> {{ form.insert_memorize_number }} </p>
+
+        </div>
+
+        {% elif participant.cognitive_load == 0 %}
+
+        <p style="font-size:24px"> Please enter the following number below: {{ participant.memorize_number }} </p>
+
+        <div class="center">
+
+            <p> {{ form.insert_memorize_number }} </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{{ next_button }}
+
+{{ endblock }}
+
+

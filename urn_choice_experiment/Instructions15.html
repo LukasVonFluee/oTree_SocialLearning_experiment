@@ -1,0 +1,41 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Sequence during 1 Block:</h1>
+
+    <h3>2. Type A participants choose between urns.</h3>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+    <div class="card-body">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+                <li> As mentioned, type A and type B participants will complete slightly different versions of the decision task, and they will not do the tasks at the same time. </li>
+                <li> After the urns have been shuffled, first, each type <b>A</b> participant has to choose between the
+                    two urns <b>4 times</b> in a block before type B participants will face their decision task. </li>
+                <li> During these 4 rounds, the urns are <b>not shuffled</b>. </li>
+                <li> Every time a type A participant chooses an urn, a marble is <b>randomly drawn</b> from the chosen urn. </li>
+                <li> The <b>colour of the marble is then revealed</b> to the type A participant who has just chosen the urn. </li>
+                <li> Then, the <b>colour of the marble is hidden again</b> and it is <b>put back into the same urn</b> again.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}

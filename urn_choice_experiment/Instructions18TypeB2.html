@@ -1,0 +1,48 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+        p.important_info {
+            text-align: center;
+        }
+
+    </style>
+
+    <h1>Your Decision Task: 1. Step</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="ul_properties">
+
+            <ul style="font-size:20px">
+
+                {% if participant.cognitive_load == 1 %}
+
+                <li> At the <b>beginning of every block</b> we will show you a <b>new, randomly generated {{ player.session.length_multi_digit }}-digit number</b>
+                    that you will have to <b>memorize</b> and then <b>recall after you have chosen between the urns</b>.</li>
+                <li> The number will be shown to you for <b>{{ session.config.timeout_seconds_multi_digit }} seconds</b>.</li>
+                <li> Correctly memorizing the numbers will give you the possibility to earn more points, and we will explain later
+                    how many points you can earn.</li>
+
+                {% elif participant.cognitive_load == 0 %}
+
+                <li> At the <b>beginning of every block</b> we will show you a <b>new, randomly generated {{ player.session.length_multi_digit }}-digit number</b>.</li>
+                <li> The number will be shown to you for <b>{{ session.config.timeout_seconds_multi_digit }} seconds</b>.</li>
+
+                {% endif %}
+
+                <li> On the next page you will see an <b>example</b> of how we would show you the number</li>
+            </ul>
+        </div>
+    </div>
+
+    {{ next_button }}
+
+{{ endblock }}
