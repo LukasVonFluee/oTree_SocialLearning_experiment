@@ -1,0 +1,30 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 3em;
+            float: left;
+        }
+
+    </style>
+
+    <h1>Please answer the following questions:</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            {{ formfields }}
+
+        </div>
+
+    </div>
+
+    <br>
+
+    {{ next_button }}
+
+{{ endblock }}

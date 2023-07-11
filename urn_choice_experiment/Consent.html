@@ -1,0 +1,61 @@
+{{ block content }}
+
+    <style>
+
+        .ul_properties {
+            /* Increase line-height
+               compare to default */
+            line-height: 2em;
+            float: left;
+        }
+
+    </style>
+
+    <h2>INTRODUCTION - PLEASE READ CAREFULLY</h2>
+
+<div class="card bg-light instructions">
+
+<div class="card-body">
+
+        <div class="ul_properties">
+
+        <ul style="font-size:20px">
+            <li> You are about to participate in a study that will last ca. 90 minutes. </li>
+            <li> A record of your participation in this research study will be maintained, but this record will be kept strictly anonymous and confidential.
+                 No one (including the experimenters) will be able to associate your responses in today’s study to you personally. </li>
+            <li> If you have questions, do not hesitate to raise your hand to call us. </li>
+            <li> <b> However, it is strictly forbidden to communicate between participants. </b> </li>
+            <li> <b> The use of mobile phones and writing utensils is also prohibited. </b> </li>
+            <li> If you do not respect these rules, we will exclude you from the study without any payment. </li>
+            <li> An assistant will walk around in the lab and check whether you follow these rules. </li>
+            <li> <b> The participation in this study is voluntary. </b> </li>
+            <li> If you don't want to participate in this study, please leave before the experiment starts and not during the experiment,
+                except for emergencies of course. </li>
+            <li> If you participate, you can earn points which will be converted into real money at the end of the study. </li>
+            <li> <b> 100 point = USD {{money}}, and you can maximally earn 8000 points = USD {{max_earning}}. </b> </li>
+            <li> <b> Together with the show-up fee of {{session.participation_fee}} you can earn USD {{total_possible_earning}} in total. </b> </li>
+            <li> You can maximize the amount of points if;
+                <ul>
+                    <li> you carefully read the instructions, </li>
+                    <li> you follow these instructions, </li>
+                    <li> and you think hard about the decisions you will make. </li>
+                </ul>
+            </li>
+
+            <li> <b> Continuing on with the study implies your consent to participate.
+                 If you agree to participate, please click the “Agree” button below to continue. Thank you! </b> </li>
+        </ul>
+
+        </div>
+
+    </div>
+
+    </div>
+
+        <div>
+            <button name="consent" value='True' class="btn btn-primary btn-large">Agree</button>
+        </div>
+
+
+{{ endblock }}
+

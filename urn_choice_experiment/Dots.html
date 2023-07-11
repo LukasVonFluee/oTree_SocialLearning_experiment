@@ -1,0 +1,312 @@
+{{ block content }}
+
+    <style>
+        .ring-container {
+            position: relative;
+        }
+
+        #ring1 {
+            position: fixed;
+        }
+
+        #ring2 {
+            position: fixed;
+            left:50%;
+            margin-left:-20px;
+        }
+
+        #ring3 {
+            position: fixed;
+        }
+
+        #ring4 {
+            position: fixed;
+            top:50%;
+            margin-top:-20px;
+        }
+
+        #ring5 {
+            position: fixed;
+            top:50%;
+            left:50%;
+            margin-top: -20px;
+            margin-left: -20px;
+            z-index: 9;
+        }
+
+        #ring6 {
+            position: fixed;
+            top:50%;
+            margin-top:-20px;
+        }
+
+        #ring7 {
+            position: fixed;
+        }
+
+        #ring8 {
+            position: fixed;
+            left:50%;
+            margin-left:-20px;
+        }
+
+        #ring9 {
+            position: fixed;
+        }
+
+        #circle1 {
+            position: fixed;
+        }
+
+        #circle2 {
+            position: fixed;
+            left:50%;
+            margin-left:-5px;
+        }
+
+        #circle3 {
+            position: fixed;
+        }
+
+        #circle4 {
+            position: fixed;
+            top:50%;
+            margin-top:-5px;
+        }
+
+        #circle5 {
+            position: fixed;
+            top:50%;
+            left:50%;
+            margin-top: -5px;
+            margin-left: -5px;
+            z-index: 9;
+        }
+
+        #circle6 {
+            position: fixed;
+            top:50%;
+            margin-top:-5px;
+        }
+
+        #circle7 {
+            position: fixed;
+            left:15px;
+        }
+
+        #circle8 {
+            position: fixed;
+            left:50%;
+            margin-left:-5px;
+        }
+
+        #circle9 {
+            position: fixed;
+        }
+
+        .circle {
+            width: 14px;
+            height: 14px;
+            background-color: #ff00c8;
+            border-radius: 50%;
+            box-sizing: content-box;
+            display: none;
+        }
+
+        .ring {
+            border: 4px solid #ff00c8;
+            border-radius: 38px;
+            height: 36px;
+            width: 36px;
+            animation: pulsate 1s ease-out;
+            animation-iteration-count: infinite; 
+            opacity: 0.0;
+            box-sizing: content-box;
+            display: none;
+        }
+
+        @keyframes pulsate {
+            0% {transform: scale(1.2, 1.2); opacity: 0.0;}
+            50% {opacity: 0.4;}
+            100% {transform: scale(0.1, 0.1); opacity: 1.0;}
+        }
+
+    </style>
+
+    <h1>Calibration</h1>
+
+    <div class="card bg-light instructions" style="border: 1px solid #3368FF">
+
+        <div class="card-body">
+
+            <div class="ul_properties">
+                <p>Please click on each of the nine purple dots that appear on the screen.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ring" id="ring1"></div>
+    <div class="ring" id="ring2"></div>
+    <div class="ring" id="ring3"></div>
+    <div class="ring" id="ring4"></div>
+    <div class="ring" id="ring5"></div>
+    <div class="ring" id="ring6"></div>
+    <div class="ring" id="ring7"></div>
+    <div class="ring" id="ring8"></div>
+    <div class="ring" id="ring9"></div>
+
+    <div class="circle" id="circle1"></div>
+    <div class="circle" id="circle2"></div>
+    <div class="circle" id="circle3"></div>
+    <div class="circle" id="circle4"></div>
+    <div class="circle" id="circle5"></div>
+    <div class="circle" id="circle6"></div>
+    <div class="circle" id="circle7"></div>
+    <div class="circle" id="circle8"></div>
+    <div class="circle" id="circle9"></div>
+
+    <br>
+
+    <button id="NextButton" class="otree-btn-next btn btn-primary">Next</button>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+// CLIENT LOGGING
+var pageName = "purpleDots"
+var cmd = "test"
+eyeTrackLog("{{key}}", "{{host}}", pageName);
+eyeTrackCmd("{{key}}", "{{host}}", cmd);
+
+function eyeTrackCmd(key, host, cmd) {
+	var url = 'https://www.descil.ethz.ch/lablauncher/eyes-remote2?key=' + key + '&host=' + host + '&cmd=' + cmd;
+	fetch(url)
+	.then(response => response.json())
+	.then(json => console.log(json))
+	.catch(error => console.log(error));
+}
+
+function eyeTrackLog(key, host, val) {
+	var url = 'https://www.descil.ethz.ch/lablauncher/eyes-remote2?key=' + key + '&host=' + host + '&cmd=l&val=' + val;
+	fetch(url)
+	.then(response => response.json())
+	.then(json => console.log(json))
+	.catch(error => console.log(error));
+}
+
+// PURPLE DOTS
+
+// set position of the dots
+var distance = 50;
+var offset = 15;
+var circle_distance = distance + offset;
+
+$("#ring1").css('top', distance);
+$("#ring1").css('left', distance);
+$("#ring2").css('top', distance);
+$("#ring3").css('top', distance);
+$("#ring3").css('right', distance);
+$("#ring4").css('left', distance);
+$("#ring6").css('right', distance);
+$("#ring7").css('bottom', distance);
+$("#ring7").css('left', distance);
+$("#ring8").css('bottom', distance);
+$("#ring9").css('bottom', distance);
+$("#ring9").css('right', distance);
+$("#circle1").css('top', circle_distance);
+$("#circle1").css('left', circle_distance);
+$("#circle2").css('top', circle_distance);
+$("#circle3").css('top', circle_distance);
+$("#circle3").css('right', circle_distance);
+$("#circle4").css('left', circle_distance);
+$("#circle6").css('right', circle_distance);
+$("#circle7").css('bottom', circle_distance);
+$("#circle7").css('left', circle_distance);
+$("#circle8").css('bottom', circle_distance);
+$("#circle9").css('bottom', circle_distance);
+$("#circle9").css('right', circle_distance);
+
+function shuffleArray(inputArray){
+    inputArray.sort(()=> Math.random() - 0.5);
+}
+
+function ringId(i){
+    return "#ring" + nums[i];
+}
+
+function circleId(i){
+    return "#circle" + nums[i];
+}
+
+var nums = [1,2,3,4,5,6,7,8,9]
+shuffleArray(nums);
+
+$(ringId(0)).show();
+$(circleId(0)).show();
+$('#NextButton').hide();
+
+$(circleId(0)).click(function() {
+    $(circleId(0)).hide();
+    $(circleId(1)).show();
+    $(ringId(0)).hide();
+    $(ringId(1)).show();
+});
+
+$(circleId(1)).click(function() {
+    $(circleId(1)).hide();
+    $(circleId(2)).show();
+    $(ringId(1)).hide();
+    $(ringId(2)).show();
+});
+
+$(circleId(2)).click(function() {
+    $(circleId(2)).hide();
+    $(circleId(3)).show();
+    $(ringId(2)).hide();
+    $(ringId(3)).show();
+});
+
+$(circleId(3)).click(function() {
+    $(circleId(3)).hide();
+    $(circleId(4)).show();
+    $(ringId(3)).hide();
+    $(ringId(4)).show();
+});
+
+$(circleId(4)).click(function() {
+    $(circleId(4)).hide();
+    $(circleId(5)).show();
+    $(ringId(4)).hide();
+    $(ringId(5)).show();
+});
+
+$(circleId(5)).click(function() {
+    $(circleId(5)).hide();
+    $(circleId(6)).show();
+    $(ringId(5)).hide();
+    $(ringId(6)).show();
+});
+
+$(circleId(6)).click(function() {
+    $(circleId(6)).hide();
+    $(circleId(7)).show();
+    $(ringId(6)).hide();
+    $(ringId(7)).show();
+});
+
+$(circleId(7)).click(function() {
+    $(circleId(7)).hide();
+    $(circleId(8)).show();
+    $(ringId(7)).hide();
+    $(ringId(8)).show();
+});
+
+$(circleId(8)).click(function() {
+    $(circleId(8)).hide();
+    $(ringId(8)).hide();
+    $('#NextButton').show();
+});
+
+</script>
+{{ endblock }}
